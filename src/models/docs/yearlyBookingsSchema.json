@@ -1,0 +1,58 @@
+{
+    "YearlyBookings": [
+        {
+            "year": "String",
+            "monthlyBookings": [
+                {
+                    "id": "ObjectId()",
+                    "month": "String",
+                    "details": {
+                        "guestBookings": [
+                            "ReferenceId",
+                            "AnotherReferenceId"
+                        ],
+                        "electricityBill": {
+                            "date": "ISODate",
+                            "periodCovered": "String",
+                            "totalBill": "Number",
+                            "shareOfOwner": "Number"
+                        },
+                        "payables": [
+                            {
+                                "date": "ISODate",
+                                "particulars": "String",
+                                "totalAmount": "Number",
+                                "remarks": "String"
+                            }
+                        ],
+                        "earnings": {
+                            "bookings": "Number",
+                            "expense": "Number",
+                            "totalNet": "Number",
+                            "shares": [
+                                {
+                                    "Mama": {
+                                        "rate": "Percentage",
+                                        "share": "Number"
+                                    }
+                                },
+                                {
+                                    "Ate": {
+                                        "rate": "Percentage",
+                                        "share": "Number"
+                                    }
+                                },
+                                {
+                                    "Aiza": {
+                                        "rate": "Percentage",
+                                        "share": "Number"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

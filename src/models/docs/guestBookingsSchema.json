@@ -1,0 +1,16 @@
+{
+    "GuestBookings": [
+        {
+            "_id": "ObjectId()",
+            "guestName": "String",
+            "checkIn": "ISODate",
+            "checkOut": "ISODate",
+            "noOfPax": "Number",
+            "noOfStay": "Number",
+            "nightlyPrice": "Number",
+            "totalPayout": "Number",
+            "datePaid": "ISODate",
+            "remarks": "String"
+        }
+    ]
+}
