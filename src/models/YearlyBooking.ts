@@ -1,5 +1,4 @@
-import mongoose from 'mongoose';
-import { guestBookingSchema } from './GuestBooking';
+import mongoose from "mongoose";
 
 const yearlyBookingSchema = new mongoose.Schema({
     year: String,
@@ -10,11 +9,10 @@ const yearlyBookingSchema = new mongoose.Schema({
                 required: true
             },
             details: {
-                guestBookings: {
-                    type: [mongoose.Schema.Types.ObjectId],
+                guestBookings:[{
+                    type: mongoose.Schema.Types.ObjectId,
                     ref: "GuestBooking",
-                    require: false,
-                },
+                }],
                 electricityBill: {
                     date: Date,
                     periodCovered: String,
@@ -55,5 +53,4 @@ const yearlyBookingSchema = new mongoose.Schema({
     ]
 });
 
-const YearlyBooking = mongoose.model('YearlyBooking', yearlyBookingSchema);
-export default YearlyBooking;
+export default mongoose.model("YearlyBooking", yearlyBookingSchema);

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 export const guestBookingSchema = new mongoose.Schema({
     guestName: {
@@ -42,5 +42,5 @@ export const guestBookingSchema = new mongoose.Schema({
     deletedAt: Date,
 });
 
-export default mongoose.model('GuestBooking', guestBookingSchema);
+export default mongoose.model("GuestBooking", guestBookingSchema);
 

@@ -4,8 +4,35 @@ import YearlyBooking from "../models/YearlyBooking";
 import { TGuestBooking, TYearlyBooking } from "../types/BookingTypes";
 import moment from "moment";
 import Big from "big.js";
+import Client from "./Client";
+import { Visitor } from "../interface/Visitor";
 
-export default class Guest {
+type BookingDetails = {
+    year: string,
+    month: string,
+    bookingId: string,
+}
+
+export default class Guest extends Client {
+    private bookingDetails: BookingDetails
+
+    constructor() {
+        super();
+        this.bookingDetails = {
+            year: "",
+            month: "",
+            bookingId: "",
+        }
+    }
+
+    public accept(visitor: Visitor): void {
+        visitor.visitGuest(this);
+    }
+
+    public getBookingDetails(): BookingDetails {
+        return this.bookingDetails;
+    }
+
     async book(booking: TGuestBooking) {
         // compute total payout - can be extracted to seperate class
         const bTotalPayout = Big(booking.noOfPax).times(Big(booking.noOfStay)).times(Big(booking.nightlyPrice))
@@ -30,28 +57,18 @@ export default class Guest {
         const year = moment(booking.checkIn).format("YYYY")
         const month = moment(booking.checkIn).format("MMMM")
 
-        const yearlyBooking: TYearlyBooking | unknown = await YearlyBooking.findOneAndUpdate(
-            { year, monthlyBookings: { $elemMatch: { month } } }, 
-            { $push: { 'monthlyBookings.$[first].details.guestBookings': guestBooking._id } },
-            { arrayFilters: [ { 'first.month': month } ] }   
-        );
-        
-        if (isEmpty(yearlyBooking)) {
-            
-            const newYearlyBooking = await YearlyBooking.create({
-                year,
-                monthlyBookings: [
-                    {
-                        month,
-                        details: {
-                            guestBookings: [guestBooking._id],             
-                        },
-                        createdAt: new Date(),
-                        updatedAt: new Date(),          
-                    }
-                ]
-            });
-            await newYearlyBooking.save();
-        }
+        this.bookingDetails.month = month;
+        this.bookingDetails.year = year;
+        this.bookingDetails.bookingId = guestBooking._id.toString();
     }
+
+    async cancelBooking(year: string, month: string, bookingId: string) {
+        await GuestBooking.deleteOne({ _id: bookingId });
+
+        this.bookingDetails.bookingId = bookingId;
+        this.bookingDetails.month = month;
+        this.bookingDetails.year = year;
+    }
+
+    
 }
