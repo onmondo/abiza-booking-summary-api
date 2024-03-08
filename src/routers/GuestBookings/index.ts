@@ -7,8 +7,6 @@ router.get("/", getYearlyBookings)
     .get("/yearly", getYearlyBookings)
     .post("/", newBooking);
 
-const reportRouter = Router();
-reportRouter.get("/:month", getBookingsByMonth)
-router.get("/:year", getBookingsByYear).use("/:year", reportRouter);
+router.get("/:year", getBookingsByYear).get("/:year/:month", getBookingsByMonth);
 
 export default router;

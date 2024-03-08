@@ -10,7 +10,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 
 // database connection to mongodb thru mongoose
-mongoose.connect('mongodb://localhost/abiza-mongodb');
+mongoose.connect('mongodb://localhost:27017/abiza-mongodb');
 
 export const app = express()
 app.use(express.json());

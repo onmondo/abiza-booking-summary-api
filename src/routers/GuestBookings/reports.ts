@@ -45,7 +45,6 @@ export const getBookingsByYear: RequestHandler = async (req: Request, res: Respo
 
 export const getBookingsByMonth: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.log(req.params)
         const year: string = req.params.year
         const month: string = req.params.month
         const reports = new Reports();
