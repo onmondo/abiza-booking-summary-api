@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import Reports from "../../services/Reports";
+import Reports, { ReportQuery } from "../../services/Reports";
 import { isEmpty } from "lodash";
 import { TGuestBooking, TYearlyBooking } from "../../types/BookingTypes";
 
@@ -51,10 +51,17 @@ export const getBookingsByMonth: RequestHandler = async (req: Request, res: Resp
         const sort: string | unknown = req.query?.sort;
         const page: string | unknown = req.query?.page;
         const limit: string | unknown = req.query?.limit;
-        
+
+        const reportQuery: ReportQuery = {
+            year,
+            month,
+            sort: sort as string,
+            page: page as string,
+            limit: limit as string,
+        }
         const sortMethod = sort as string;
         const reports = new Reports();
-        const monthlyBookings: TGuestBooking[] = await reports.fetchBookingsByMonth(year, month, sortMethod);
+        const monthlyBookings: TGuestBooking[] = await reports.fetchBookingsByMonth(reportQuery);
         if (isEmpty(monthlyBookings)) {
             res.json({
                 message: "No monthly bookings",

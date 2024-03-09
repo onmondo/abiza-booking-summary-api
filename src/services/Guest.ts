@@ -41,12 +41,15 @@ export default class Guest extends Client {
         // new record for GuestBooking
         const guestBooking = await GuestBooking.create({
             guestName: booking.guestName,
+            bookFrom: booking.bookFrom,
+            rooms: booking.rooms,
             checkIn: booking.checkIn,
             checkOut: booking.checkOut,
             noOfPax: booking.noOfPax,
             noOfStay: booking.noOfStay,
             nightlyPrice: booking.nightlyPrice,
             totalPayout: (totalPayout > (booking?.totalPayout || 0)) ? booking.totalPayout : totalPayout,
+            modeOfPayment: booking.modeOfPayment,
             datePaid: booking.datePaid,
             remarks: booking.remarks,
             createdAt: new Date(),

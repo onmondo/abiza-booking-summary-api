@@ -5,6 +5,8 @@ export const guestBookingSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    bookFrom: String,
+    rooms: [String],
     checkIn: {
         type: Date,
         required: true,
@@ -29,6 +31,7 @@ export const guestBookingSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    modeOfPayment: String,
     datePaid: Date,
     remarks: String,
     createdAt: {
