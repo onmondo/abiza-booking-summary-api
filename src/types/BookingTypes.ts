@@ -1,6 +1,5 @@
 export type TGuestBooking = {
     guestName: string,
-    bookFrom: string,
     rooms: string[],
     checkIn: Date,
     checkOut: Date,

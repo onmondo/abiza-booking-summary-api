@@ -10,7 +10,10 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 
 // database connection to mongodb thru mongoose
-mongoose.connect('mongodb://localhost:27017/abiza-mongodb');
+const stgConnectionUrl = (process.env.MONGO_STG) ? process.env.MONGO_STG : ""
+const stgConnectionPswd = (process.env.MONGO_STG_PSWD) ? process.env.MONGO_STG_PSWD : ""
+const connectionUrl = process.env.MONGO_LOCAL || stgConnectionUrl?.replace("<password>", stgConnectionPswd)
+mongoose.connect(connectionUrl);
 
 export const app = express()
 app.use(express.json());
