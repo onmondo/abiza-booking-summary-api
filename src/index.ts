@@ -8,24 +8,37 @@ import guestBookings from './routers/GuestBookings';
 // import { AppDataSource } from './util/database/dataSource';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import { rateLimit } from 'express-rate-limit';
+import { envKeys } from './util/config';
 
 // database connection to mongodb thru mongoose
-const stgConnectionUrl = (process.env.MONGO_STG) ? process.env.MONGO_STG : ""
-const stgConnectionPswd = (process.env.MONGO_STG_PSWD) ? process.env.MONGO_STG_PSWD : ""
-const connectionUrl = process.env.MONGO_LOCAL || stgConnectionUrl?.replace("<password>", stgConnectionPswd)
+const {
+    MONGO_DB_URL, 
+    MONGO_DB_PWD, 
+    RATE_LIMIT_WINDOW, 
+    REQUEST_LIMIT 
+} = envKeys();
+const connectionBaseUrl: string = MONGO_DB_URL
+const connectionPassword: string = MONGO_DB_PWD
+const connectionUrl = connectionBaseUrl.replace("<password>", connectionPassword)
 mongoose.connect(connectionUrl);
 
 export const app = express()
 app.use(express.json());
 
-// app.use(function(req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
-
 app.use(cors());
 
+const limiter = rateLimit({
+	windowMs: RATE_LIMIT_WINDOW, 
+	limit: REQUEST_LIMIT, 
+	standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+    message: {
+        message: 'Request has been stop.'
+    }
+})
+
+app.use(limiter);
 // app.use('/trpc', createExpressMiddleware({ 
 //     router: appRouter, 
 //     createContext
@@ -38,9 +51,6 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/api/v1/bookings', guestBookings);
-// app.use('/api/v1/orders', orders);
-
-// app.use('/txn', transaction);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
     const err = new Error(`Cannot find ${req.originalUrl} on this server!`);
