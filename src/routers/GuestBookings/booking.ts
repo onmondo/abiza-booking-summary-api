@@ -45,3 +45,23 @@ export const deleteBookingById: RequestHandler = async (req: Request, res: Respo
         });
     }
 }
+
+export const updateBooking: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const guest = new Guest();
+        const bookingRequest: TGuestBooking = req.body
+        await guest.book(bookingRequest);
+        const persistBookingVisitor = new PersistBookingVisitor();
+        await guest.accept(persistBookingVisitor);
+        res.status(201)
+            .json({
+                message: 'Booking created',
+            });
+    } catch(error: any) {
+        const errorDetails = error as Error;
+        res.status(500).json({
+            message: 'Internal Server Error',
+            error: errorDetails.message
+        });
+    }
+}

@@ -6,6 +6,7 @@ import moment from "moment";
 import Big from "big.js";
 import Client from "./Client";
 import { Visitor } from "../interface/Visitor";
+import GuestBookingDetail from "./GuestBooking";
 
 type BookingDetails = {
     year: string,
@@ -38,23 +39,26 @@ export default class Guest extends Client {
         const bTotalPayout = Big(booking.noOfPax).times(Big(booking.noOfStay)).times(Big(booking.nightlyPrice))
         const totalPayout = bTotalPayout.toNumber();
 
+        // build new guest booking
+        const guestBookingDirector = new GuestBookingDetail.GuestBookingBuilder.GuestBookingDirector();
+        const guestBookingBuilder = new GuestBookingDetail.GuestBookingBuilder()
+        guestBookingDirector.buildNewGuestBooking(guestBookingBuilder);
+        guestBookingBuilder
+            .setGuestName(booking.guestName)
+            .setFrom(booking.from)
+            .setRooms(booking.rooms)
+            .setCheckIn(booking.checkIn)
+            .setCheckOut(booking.checkOut)
+            .setNoOfPax(booking.noOfPax)
+            .setNoOfStay(booking.noOfStay)
+            .setNightlyPrice(booking.nightlyPrice)
+            .setTotalPayout((totalPayout > (booking?.totalPayout || 0)) ? booking.totalPayout || 0 : totalPayout)
+            .setModeOfPayment(booking.modeOfPayment)
+            .setDatePaid(booking.datePaid || new Date())
+            
+        const newGuestBooking = guestBookingBuilder.build();
         // new record for GuestBooking
-        const guestBooking = await GuestBooking.create({
-            guestName: booking.guestName,
-            from: booking.from,
-            rooms: booking.rooms,
-            checkIn: booking.checkIn,
-            checkOut: booking.checkOut,
-            noOfPax: booking.noOfPax,
-            noOfStay: booking.noOfStay,
-            nightlyPrice: booking.nightlyPrice,
-            totalPayout: (totalPayout > (booking?.totalPayout || 0)) ? booking.totalPayout : totalPayout,
-            modeOfPayment: booking.modeOfPayment,
-            datePaid: booking.datePaid,
-            remarks: booking.remarks,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+        const guestBooking = await GuestBooking.create(newGuestBooking.getGuestBooking());
         await guestBooking.save();
 
         const year = moment(booking.checkIn).format("YYYY")
