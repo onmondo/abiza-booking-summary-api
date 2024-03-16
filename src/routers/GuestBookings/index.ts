@@ -1,14 +1,16 @@
 import { Router } from 'express';
-import { getBookingsByMonth, getBookingsByYear, getYearlyBookings } from './reports';
-import { newBooking, deleteBookingById } from './booking';
+import ReportEndpoints from './reports';
+import BookingEndpoints from './booking';
 
 const router = Router();
-router.get("/", getYearlyBookings)
-    .get("/yearly", getYearlyBookings)
-    .post("/", newBooking);
+router.get("/", ReportEndpoints.v2.getYearlyBookings)
+    .get("/yearly", ReportEndpoints.v1.getYearlyBookings)
+    .post("/", BookingEndpoints.v1.newBooking);
 
-router.get("/:year", getBookingsByYear)
-    .get("/:year/:month", getBookingsByMonth)
-    .delete("/:year/:month/:id", deleteBookingById);
+router.get("/:year", ReportEndpoints.v1.getBookingsByYear)
+    .get("/:year/:month", ReportEndpoints.v1.getBookingsByMonth)
+    .delete("/:year/:month/:id", BookingEndpoints.v1.deleteBookingById)
+    .put("/:year/:month/:id", BookingEndpoints.v1.updateBookingById)
+    .patch("/:year/:month/:id", BookingEndpoints.v1.softUpdateBookingById);
 
 export default router;

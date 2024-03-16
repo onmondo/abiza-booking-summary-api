@@ -1,7 +1,7 @@
 import { isEmpty } from "lodash";
 import GuestBooking from "../models/GuestBooking";
 import YearlyBooking from "../models/YearlyBooking";
-import { TGuestBooking, TYearlyBooking } from "../types/BookingTypes";
+import { TDeleteBooking, TGuestBooking, TUpdateGuestBooking, TYearlyBooking } from "../types/BookingTypes";
 import moment from "moment";
 import Big from "big.js";
 import Client from "./Client";
@@ -26,6 +26,12 @@ export default class Guest extends Client {
         }
     }
 
+    private computeTotalPayout(noOfPax: number, noOfStay: number, nightlyPrice: number): number {
+        // compute total payout - can be extracted to seperate class
+        const bTotalPayout = Big(noOfPax).times(Big(noOfStay)).times(Big(nightlyPrice))
+        return bTotalPayout.toNumber();
+    }
+
     public accept(visitor: Visitor): void {
         visitor.visitGuest(this);
     }
@@ -35,9 +41,7 @@ export default class Guest extends Client {
     }
 
     async book(booking: TGuestBooking) {
-        // compute total payout - can be extracted to seperate class
-        const bTotalPayout = Big(booking.noOfPax).times(Big(booking.noOfStay)).times(Big(booking.nightlyPrice))
-        const totalPayout = bTotalPayout.toNumber();
+        const totalPayout = this.computeTotalPayout(booking.noOfPax, booking.noOfStay, booking.nightlyPrice);
 
         // build new guest booking
         const guestBookingDirector = new GuestBookingDetail.GuestBookingBuilder.GuestBookingDirector();
@@ -69,13 +73,63 @@ export default class Guest extends Client {
         this.bookingDetails.bookingId = guestBooking._id.toString();
     }
 
-    async cancelBooking(year: string, month: string, bookingId: string) {
-        await GuestBooking.deleteOne({ _id: bookingId });
+    async cancelBooking(deleteBooking: TDeleteBooking) {
+        await GuestBooking.deleteOne({ _id: deleteBooking.bookingId });
 
-        this.bookingDetails.bookingId = bookingId;
-        this.bookingDetails.month = month;
-        this.bookingDetails.year = year;
+        this.bookingDetails.bookingId = deleteBooking.bookingId;
+        this.bookingDetails.month = deleteBooking.month;
+        this.bookingDetails.year = deleteBooking.year;
     }
 
+    async fullUpdateBooking(bookingId: string, booking: TGuestBooking) {
+        const totalPayout = this.computeTotalPayout(booking.noOfPax, booking.noOfStay, booking.nightlyPrice);
+
+        const guestBookingDirector = new GuestBookingDetail.GuestBookingBuilder.GuestBookingDirector();
+        const guestBookingBuilder = new GuestBookingDetail.GuestBookingBuilder()
+        guestBookingDirector.buildUpdateGuestBooking(guestBookingBuilder);
+        guestBookingBuilder.setFrom(booking.from)
+            .setGuestName(booking.guestName)
+            .setRooms(booking.rooms)
+            .setCheckIn(booking.checkIn)
+            .setCheckOut(booking.checkOut)
+            .setNoOfPax(booking.noOfPax)
+            .setNoOfStay(booking.noOfStay)
+            .setNightlyPrice(booking.nightlyPrice)
+            .setTotalPayout((totalPayout > (booking?.totalPayout || 0)) ? booking.totalPayout || 0 : totalPayout)
+            .setModeOfPayment(booking.modeOfPayment)
+            .setDatePaid(booking.datePaid || new Date())
+            .setRemarks(booking.remarks || "")
+
+        const guestBookingUpdate = guestBookingBuilder.build();
+        await GuestBooking.findByIdAndUpdate({ _id: bookingId }, guestBookingUpdate.getGuestBooking())
+    }
     
+    async softUpdateBooking(bookingId: string, booking: TGuestBooking) {
+        let totalPayout = 0;
+        if (booking?.totalPayout) {
+            totalPayout = this.computeTotalPayout(booking.noOfPax, booking.noOfStay, booking.nightlyPrice);
+        }
+        
+        const guestBookingDirector = new GuestBookingDetail.SoftGuestBookingBuilder.GuestBookingDirector();
+        const guestBookingBuilder = new GuestBookingDetail.SoftGuestBookingBuilder(bookingId)
+        guestBookingDirector.buildUpdateGuestBooking(guestBookingBuilder);
+        if (booking.from) guestBookingBuilder.setFrom(booking.from);
+        if (booking.rooms) guestBookingBuilder.setRooms(booking.rooms);
+        if (booking.checkIn) guestBookingBuilder.setCheckIn(booking.checkIn);
+        if (booking.checkOut) guestBookingBuilder.setCheckOut(booking.checkOut);
+        if (booking.noOfPax) guestBookingBuilder.setNoOfPax(booking.noOfPax);
+        if (booking.noOfStay) guestBookingBuilder.setNoOfStay(booking.noOfStay);
+        if (booking.nightlyPrice) guestBookingBuilder.setNightlyPrice(booking.nightlyPrice);
+        if (booking?.totalPayout) guestBookingBuilder.setTotalPayout((totalPayout > (booking?.totalPayout || 0)) ? booking.totalPayout || 0 : totalPayout);
+        if (booking.modeOfPayment) guestBookingBuilder.setModeOfPayment(booking.modeOfPayment);
+        if (booking.datePaid) guestBookingBuilder.setDatePaid(booking.datePaid);
+        if (booking.remarks) guestBookingBuilder.setRemarks(booking.remarks);
+
+        const guestBookingUpdate = guestBookingBuilder.build();
+        const guestBookingDetails = guestBookingUpdate.getGuestBooking();
+        
+        const guestBookingRequest = guestBookingDetails as TUpdateGuestBooking<object>;
+
+        await GuestBooking.findByIdAndUpdate({ _id: bookingId }, guestBookingRequest.details)
+    }
 }

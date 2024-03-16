@@ -1,20 +1,31 @@
 export type TGuestBooking = {
-    guestName: string,
-    rooms: string[],
-    checkIn: Date,
-    checkOut: Date,
-    noOfPax: number,
-    noOfStay: number,
-    nightlyPrice: number,
-    totalPayout?: number,
-    from: string,
-    modeOfPayment: string
-    datePaid?: Date,
-    remarks?: string,
-    createdAt?: Date,
-    updatedAt?: Date,
-    deletedAt?: Date,
+    guestName: string;
+    rooms: string[];
+    checkIn: Date;
+    checkOut: Date;
+    noOfPax: number;
+    noOfStay: number;
+    nightlyPrice: number;
+    totalPayout?: number;
+    from: string;
+    modeOfPayment: string;
+    datePaid?: Date;
+    remarks?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    deletedAt?: Date;
 };
+
+export type TUpdateGuestBooking<T> = {
+    bookingId: string;
+    details: T;
+};
+
+export type TDeleteBooking = {
+    year: string
+    month: string
+    bookingId: string
+}
 
 export type TYearlyBooking = {
     year: string,
