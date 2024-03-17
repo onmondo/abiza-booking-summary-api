@@ -2,6 +2,8 @@ import { head, isEmpty } from "lodash";
 import YearlyBooking from "../models/YearlyBooking";
 import { TGuestBooking, TYearlyBooking } from "../types/BookingTypes";
 import GuestBooking from "../models/GuestBooking";
+import { SortOrder } from "mongoose";
+import moment from "moment";
 
 export type ReportQuery = {
     year: string,
@@ -39,34 +41,33 @@ export default class Reports {
     }
     async fetchBookingsByMonth(reportQuery: ReportQuery): Promise<TGuestBooking[]> {
         try {
-            const { year, month, sort } = reportQuery;
-            let yearlyBooking: TYearlyBooking | unknown = await YearlyBooking
-                .findOne({ year, monthlyBookings: { $elemMatch: { month } } })
-                // .findOneAndUpdate(filter, update, options)
-                // .populate("monthlyBookings.details.guestBookings")
-                // .exec();
-            
-            if (isEmpty(yearlyBooking)) {
-                return [];
+            const { year, month, sort, page, limit } = reportQuery;
+
+            let skip: number = 0;
+            let bookingsPerPage: number = 10;
+            if (page && limit) {
+                bookingsPerPage = parseInt(limit)
+                skip = (parseInt(page) - 1) * bookingsPerPage
             }
 
-            yearlyBooking = await YearlyBooking
-                .findOne({ year, monthlyBookings: { $elemMatch: { month } } })
-                .populate("monthlyBookings.details.guestBookings")
+            const daysInMonth = moment(`${year}-${month}`).daysInMonth();
+            const monthlyBookings = await GuestBooking
+                .find({ 
+                    checkIn: { 
+                        $gte: moment(`${year}-${month}-1`).format("YYYY-MM-DD").toString(),
+                        $lte: moment(`${year}-${month}-${daysInMonth}`).format("YYYY-MM-DD").toString()
+                    } 
+                })
+                .skip(skip)
+                .limit(bookingsPerPage)
+                .sort({ checkIn: sort as SortOrder })
                 .exec();
 
-            const projectedYearlyBooking = yearlyBooking as TYearlyBooking;
-            const monthlyBookings: TGuestBooking[] | unknown = head(projectedYearlyBooking.monthlyBookings)?.details?.guestBookings;
-
             let projectedMonthlyBookings = monthlyBookings as TGuestBooking[];
-            if (sort === "desc") {
-                projectedMonthlyBookings = projectedMonthlyBookings.sort((a: any, b: any) => b.checkIn - a.checkIn);
-            } else {
-                projectedMonthlyBookings = projectedMonthlyBookings.sort((a: any, b: any) => a.checkIn - b.checkIn);
-            }
             
             return projectedMonthlyBookings;
         } catch (error: any) {
+            console.log(error.message)
             throw new Error('Error in retrieving a yearly booking');
         }
     }
