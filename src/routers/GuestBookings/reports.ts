@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import Reports, { ReportQuery } from "../../services/Reports";
+import Reports, { ReportQuery, ReportQueryById } from "../../services/Reports";
 import { isEmpty } from "lodash";
 import { TGuestBooking, TYearlyBooking } from "../../types/BookingTypes";
 
@@ -96,6 +96,36 @@ export default class ReportEndpoints {
                     res.json({
                         message: "Bookings",
                         yearlyBookings
+                    });
+                }
+            } catch(error: any) {
+                console.log(error);
+            }
+        }
+
+        static getBookingById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const year: string = req.params?.year
+                const month: string = req.params?.month
+                const bookingId: string = req.params?.id
+        
+                const reportQuery: ReportQueryById = {
+                    id: bookingId,
+                    year,
+                    month,
+                }
+                // const sortMethod = sort as string;
+                const reports = new Reports();
+                const guestBooking: TGuestBooking = await reports.fetchBookingsById(reportQuery);
+                if (isEmpty(guestBooking)) {
+                    res.json({
+                        message: "No monthly bookings",
+                        booking: guestBooking
+                    });
+                } else {
+                    res.json({
+                        message: "Bookings",
+                        booking: guestBooking
                     });
                 }
             } catch(error: any) {

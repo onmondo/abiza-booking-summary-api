@@ -1,6 +1,7 @@
 import { head, isEmpty } from "lodash";
 import YearlyBooking from "../models/YearlyBooking";
 import { TGuestBooking, TYearlyBooking } from "../types/BookingTypes";
+import GuestBooking from "../models/GuestBooking";
 
 export type ReportQuery = {
     year: string,
@@ -8,6 +9,12 @@ export type ReportQuery = {
     sort?: string,
     page?: string,
     limit?: string
+}
+
+export type ReportQueryById = {
+    id?: string;
+    year?: string;
+    month?: string;
 }
 
 export default class Reports {
@@ -61,6 +68,15 @@ export default class Reports {
             return projectedMonthlyBookings;
         } catch (error: any) {
             throw new Error('Error in retrieving a yearly booking');
+        }
+    }
+    async fetchBookingsById(reportQuery: ReportQueryById): Promise<TGuestBooking> {
+        try {
+            const guestBooking: TGuestBooking | null = await GuestBooking.findById(reportQuery.id)
+            const projectedGuestBooking  = guestBooking as TGuestBooking;
+            return projectedGuestBooking;
+        } catch (error: any) {
+            throw new Error('Error in retrieving a guest booking');
         }
     }
 }
