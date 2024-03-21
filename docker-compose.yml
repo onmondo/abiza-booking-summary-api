@@ -9,3 +9,17 @@ services:
     volumes:
       - ./data:/data/db
     restart: always
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672" # RabbitMQ server
+      - "15672:15672" # RabbitMQ management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "password"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq_data:

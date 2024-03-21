@@ -3,6 +3,7 @@ import Guest from "../../services/Guest";
 import { TGuestBooking } from "../../types/BookingTypes";
 import PersistBookingVisitor from "../../services/PersistBookingVisitor";
 import DeleteBookingVisitor from "../../services/DeleteBookingVisitor";
+import Producer from "../../mq/DirectMessage/Producer";
 
 export default class BookingEndpoints {
     static v1 = class v1 {
@@ -13,6 +14,8 @@ export default class BookingEndpoints {
                 await guest.book(bookingRequest);
                 const persistBookingVisitor = new PersistBookingVisitor();
                 await guest.accept(persistBookingVisitor);
+
+                await Producer.publishMesssage("logType", req.body)
                 res.status(201)
                     .json({
                         message: 'Booking created',

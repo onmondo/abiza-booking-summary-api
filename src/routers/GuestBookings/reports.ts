@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import Reports, { ReportQuery, ReportQueryById } from "../../services/Reports";
 import { isEmpty } from "lodash";
-import { TGuestBooking, TYearlyBooking } from "../../types/BookingTypes";
+import { TGuestBooking, TGuestBookingReport, TYearlyBooking } from "../../types/BookingTypes";
+// import Publisher from "../../mq/DirectMessage/Producer";
 
 export default class ReportEndpoints {
     static v1 = class v1 {
         static getYearlyBookings: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
             try {
-                const reports = new Reports();
-                const yearlyBookings: TYearlyBooking[] = await reports.fetchAllYearlyBookings();
+                const yearlyBookings: TYearlyBooking[] = await Reports.v1.fetchAllYearlyBookings();
                 if (isEmpty(yearlyBookings)) {
                     res.json({
                         message: "No yearly bookings",
@@ -28,8 +28,7 @@ export default class ReportEndpoints {
         static getBookingsByYear: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const year: string = req.params.year
-                const reports = new Reports();
-                const yearlyBooking: TYearlyBooking = await reports.fetchBookingsByYear(year);
+                const yearlyBooking: TYearlyBooking = await Reports.v1.fetchBookingsByYear(year);
                 if (isEmpty(yearlyBooking)) {
                     res.json({
                         message: "No yearly bookings",
@@ -62,8 +61,7 @@ export default class ReportEndpoints {
                     limit: limit as string,
                 }
                 // const sortMethod = sort as string;
-                const reports = new Reports();
-                const monthlyBookings: TGuestBooking[] = await reports.fetchBookingsByMonth(reportQuery);
+                const monthlyBookings: TGuestBooking[] = await Reports.v1.fetchBookingsByMonth(reportQuery);
                 if (isEmpty(monthlyBookings)) {
                     res.json({
                         message: "No monthly bookings",
@@ -84,9 +82,7 @@ export default class ReportEndpoints {
         static getYearlyBookings: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const guestName = req.query?.guest;
-                console.log("guestName", guestName);
-                const reports = new Reports();
-                const yearlyBookings: TYearlyBooking[] = await reports.fetchAllYearlyBookings();
+                const yearlyBookings: TYearlyBooking[] = await Reports.v1.fetchAllYearlyBookings();
                 if (isEmpty(yearlyBookings)) {
                     res.json({
                         message: "No yearly bookings",
@@ -115,8 +111,7 @@ export default class ReportEndpoints {
                     month,
                 }
                 // const sortMethod = sort as string;
-                const reports = new Reports();
-                const guestBooking: TGuestBooking = await reports.fetchBookingsById(reportQuery);
+                const guestBooking: TGuestBooking = await Reports.v1.fetchBookingsById(reportQuery);
                 if (isEmpty(guestBooking)) {
                     res.json({
                         message: "No monthly bookings",
@@ -126,6 +121,39 @@ export default class ReportEndpoints {
                     res.json({
                         message: "Bookings",
                         booking: guestBooking
+                    });
+                }
+            } catch(error: any) {
+                console.log(error);
+            }
+        }
+        static getBookingsByMonth: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const year: string = req.params.year
+                const month: string = req.params.month
+                const sort: string | unknown = req.query?.sort;
+                const page: string | unknown = req.query?.page;
+                const limit: string | unknown = req.query?.limit;
+        
+                const reportQuery: ReportQuery = {
+                    year,
+                    month,
+                    sort: sort as string,
+                    page: page as string,
+                    limit: limit as string,
+                }
+                // temporary disable - MQ direct message
+                // await Publisher.publishMesssage("Info", `Booking for the month of ${month}`)
+                const monthlyBookings: TGuestBookingReport = await Reports.v2.fetchBookingsByMonth(reportQuery);
+                if (isEmpty(monthlyBookings)) {
+                    res.json({
+                        message: "No monthly bookings",
+                        monthlyBookings: { ...monthlyBookings }
+                    });
+                } else {
+                    res.json({
+                        message: "Bookings",
+                        monthlyBookings: { ...monthlyBookings }
                     });
                 }
             } catch(error: any) {

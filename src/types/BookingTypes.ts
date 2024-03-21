@@ -16,6 +16,11 @@ export type TGuestBooking = {
     deletedAt?: Date;
 };
 
+export type TGuestBookingReport = {
+    monthlyBookings: TGuestBooking[],
+    totalCount: number
+}
+
 export type TUpdateGuestBooking<T> = {
     bookingId: string;
     details: T;

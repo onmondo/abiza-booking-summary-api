@@ -3,13 +3,14 @@ import express, { NextFunction, Request, Response } from 'express';
 // import { createExpressMiddleware } from '@trpc/server/adapters/express';
 // import { appRouter } from './routers';
 // import { createContext } from './util/createContext';
-import guestBookings from './routers/GuestBookings';
+import guestBookings from '../routers/GuestBookings';
 // import orders from './routers/Orders';
 // import { AppDataSource } from './util/database/dataSource';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { rateLimit } from 'express-rate-limit';
-import { envKeys } from './util/config';
+import { envKeys } from '../util/config';
+// import Consumer from '../mq/DirectMessage/Consumer';
 
 // database connection to mongodb thru mongoose
 const {
@@ -50,7 +51,7 @@ app.get('/', (req: Request, res: Response) => {
     })
 });
 
-app.use('/api/v1/bookings', guestBookings);
+// app.use('/api/v1/bookings', guestBookings);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
     const err = new Error(`Cannot find ${req.originalUrl} on this server!`);
@@ -59,5 +60,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
     res.render('error', { error: err })
 });
 
-const port = 3000;
+// Consumer.consumeMessage();
+
+const port = 3001;
 app.listen(port, () => console.log(`listening on port ${port}`))
