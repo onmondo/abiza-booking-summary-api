@@ -9,28 +9,53 @@ export default class PersistBookingVisitor implements Visitor {
         const bookingDetails = guest.getBookingDetails();
         const { year, month, bookingId } = bookingDetails;
 
-        const yearlyBooking: TYearlyBooking | unknown = await YearlyBooking.findOneAndUpdate(
-            { year, monthlyBookings: { $elemMatch: { month } } }, 
+        const monthlyBooking: TYearlyBooking | unknown = await YearlyBooking.findOneAndUpdate(
+            { monthlyBookings: { $elemMatch: { month } } }, 
             { $push: { 'monthlyBookings.$[first].details.guestBookings': bookingId } },
             { arrayFilters: [ { 'first.month': month } ] }   
         );
-        
-        if (isEmpty(yearlyBooking)) {
+
+        console.log("monthlyBooking", monthlyBooking)
+
+        if (isEmpty(monthlyBooking)) {
+            const yearlyBooking: TYearlyBooking | unknown = await YearlyBooking.findOneAndUpdate(
+                { year }, 
+                { 
+                    $push: { 
+                        monthlyBookings: {
+                            month,
+                            details: {
+                                guestBookings: [bookingId],             
+                            },
+                            createdAt: new Date(),
+                            updatedAt: new Date(),          
+                        }
+                    } 
+                },
+                { $push: { 'monthlyBookings.$[first].details.guestBookings': bookingId } },
+            );
+
+            console.log("yearlyBooking", yearlyBooking)
+
+            if (isEmpty(yearlyBooking)) {
             
-            const newYearlyBooking = await YearlyBooking.create({
-                year,
-                monthlyBookings: [
-                    {
-                        month,
-                        details: {
-                            guestBookings: [bookingId],             
-                        },
-                        createdAt: new Date(),
-                        updatedAt: new Date(),          
-                    }
-                ]
-            });
-            await newYearlyBooking.save();
+                const newYearlyBooking = await YearlyBooking.create({
+                    year,
+                    monthlyBookings: [
+                        {
+                            month,
+                            details: {
+                                guestBookings: [bookingId],             
+                            },
+                            createdAt: new Date(),
+                            updatedAt: new Date(),          
+                        }
+                    ]
+                });
+                await newYearlyBooking.save();
+            }
         }
+        
+
     }
 }
