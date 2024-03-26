@@ -138,5 +138,25 @@ export default class Reports {
                 throw new Error('Error in retrieving a yearly booking');
             }
         }
+        static fetchAllYearlyBookings() {
+            try {
+                const yearlyBookings = YearlyBooking.find().cursor();
+                return yearlyBookings;
+            } catch (error: any) {
+                throw new Error('Error in retrieving yearly bookings');
+            }
+        }
+        static fetchBookingsByYear(year: string) {
+            try {
+                const yearlyBooking = YearlyBooking
+                    .findOne({ year })
+                    .populate("monthlyBookings.details.guestBookings")
+                    .cursor();
+                return yearlyBooking;
+            } catch (error: any) {
+                console.log(error.message)
+                throw new Error('Error in retrieving a yearly booking');
+            }
+        }
     }
 }

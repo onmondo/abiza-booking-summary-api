@@ -5,9 +5,9 @@ import BookingEndpoints from './booking';
 const router = Router();
 router
     .get("/", ReportEndpoints.v2.getYearlyBookings)
-    .get("/:year", ReportEndpoints.v1.getBookingsByYear)
+    .get("/:year", ReportEndpoints.v2.getBookingsByYear)
     .get("/:id", ReportEndpoints.v2.getBookingById)
-    .get("/yearly", ReportEndpoints.v1.getYearlyBookings)
+    // .get("/yearly", ReportEndpoints.v2.getYearlyBookings)
     .post("/", BookingEndpoints.v1.newBooking);
 
 router

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import Reports, { ReportQuery, ReportQueryById } from "../../services/Reports";
 import { isEmpty } from "lodash";
 import { TGuestBooking, TGuestBookingReport, TYearlyBooking } from "../../types/BookingTypes";
+import { Transform } from "stream";
 // import Publisher from "../../mq/DirectMessage/Producer";
 
 export default class ReportEndpoints {
@@ -9,6 +10,7 @@ export default class ReportEndpoints {
         static getYearlyBookings: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const yearlyBookings: TYearlyBooking[] = await Reports.v1.fetchAllYearlyBookings();
+                
                 if (isEmpty(yearlyBookings)) {
                     res.json({
                         message: "No yearly bookings",
@@ -81,19 +83,13 @@ export default class ReportEndpoints {
     static v2 = class v2 extends ReportEndpoints.v1 {
         static getYearlyBookings: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
             try {
-                const guestName = req.query?.guest;
-                const yearlyBookings: TYearlyBooking[] = await Reports.v1.fetchAllYearlyBookings();
-                if (isEmpty(yearlyBookings)) {
-                    res.json({
-                        message: "No yearly bookings",
-                        yearlyBookings
-                    });
-                } else {
-                    res.json({
-                        message: "Bookings",
-                        yearlyBookings
-                    });
+                const transformStream = new Transform({ objectMode: true })
+
+                transformStream._transform = function(chunk, encoding, callback) {
+                    callback(null, JSON.stringify(chunk))
                 }
+                const transformedBookings = Reports.v2.fetchAllYearlyBookings().pipe(transformStream)
+                transformedBookings.pipe(res)
             } catch(error: any) {
                 console.log(error);
             }
@@ -127,6 +123,7 @@ export default class ReportEndpoints {
                 console.log(error);
             }
         }
+
         static getBookingsByMonth: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const year: string = req.params.year
@@ -156,6 +153,22 @@ export default class ReportEndpoints {
                         monthlyBookings: { ...monthlyBookings }
                     });
                 }
+            } catch(error: any) {
+                console.log(error);
+            }
+        }
+
+        static getBookingsByYear: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const year: string = req.params.year
+
+                const transformStream = new Transform({ objectMode: true })
+
+                transformStream._transform = function(chunk, encoding, callback) {
+                    callback(null, JSON.stringify(chunk))
+                }
+                const transformedBookings = Reports.v2.fetchBookingsByYear(year).pipe(transformStream)
+                transformedBookings.pipe(res)
             } catch(error: any) {
                 console.log(error);
             }
