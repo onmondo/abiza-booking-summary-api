@@ -61,7 +61,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
     res.render('error', { error: err })
 });
 
-Server.consumeMessage()
+Server.consumeMessage("rpc_queue")
 
 const port = 3003;
 app.listen(port, () => console.log(`listening on port ${port}`))

@@ -62,7 +62,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
     res.render('error', { error: err })
 });
 
-Client.produceMessage("Request for ping", "request-queue");
+Client.produceMessage("rpc_queue", "Request for ping");
 
 const port = 3002;
 app.listen(port, () => console.log(`listening on port ${port}`))
