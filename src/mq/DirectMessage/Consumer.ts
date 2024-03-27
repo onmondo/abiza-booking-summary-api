@@ -1,4 +1,4 @@
-import LogChannel from "../LogChannel";
+import LogChannel from "../MQChannel";
 
 export default class Consumer {
     static async consumeMessage() {

@@ -3,6 +3,7 @@ import Guest from "../../services/Guest";
 import { TGuestBooking } from "../../types/BookingTypes";
 import PersistBookingVisitor from "../../services/PersistBookingVisitor";
 import DeleteBookingVisitor from "../../services/DeleteBookingVisitor";
+import Client from "../../mq/RequestResponse/Client";
 // import Producer from "../../mq/DirectMessage/Producer";
 
 export default class BookingEndpoints {
@@ -12,8 +13,11 @@ export default class BookingEndpoints {
                 const guest = new Guest();
                 const bookingRequest: TGuestBooking = req.body
                 await guest.book(bookingRequest);
-                const persistBookingVisitor = new PersistBookingVisitor();
-                await guest.accept(persistBookingVisitor);
+                const bookingDetails = guest.getBookingDetails()
+                Client.produceMessage("rpc_queue", bookingDetails);
+                
+                // const persistBookingVisitor = new PersistBookingVisitor();
+                // await guest.accept(persistBookingVisitor);
 
                 // await Producer.publishMesssage("logType", req.body)
                 res.status(201)

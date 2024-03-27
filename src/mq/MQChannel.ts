@@ -1,12 +1,12 @@
 import amqp, { Channel, Connection } from "amqplib";
 import { envKeys } from "../util/config"
 
-export default class LogChannel {
+export default class MQChannel {
     static getInstace() {
         throw new Error("Method not implemented.");
     }
 
-    private static instance: LogChannel;
+    private static instance: MQChannel;
     private channel: unknown;
     private connection: unknown;
 
@@ -37,12 +37,11 @@ export default class LogChannel {
         this.channel = await connection.createChannel();
     }
 
-    public static async getInstance(): Promise<LogChannel> {
-            console.log("Creating new rabitmq instance...")
-            LogChannel.instance = new LogChannel()
-            await LogChannel.instance.createChannel()
+    public static async getInstance(): Promise<MQChannel> {
+        console.log("Creating new rabitmq instance...")
+        MQChannel.instance = new MQChannel()
+        await MQChannel.instance.createChannel()
         
-
-        return LogChannel.instance;
+        return MQChannel.instance;
     }
 }

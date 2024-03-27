@@ -1,5 +1,5 @@
 import { envKeys } from "../../util/config";
-import LogChannel from "../LogChannel";
+import LogChannel from "../MQChannel";
 
 export default class Producer {
     static async publishMesssage(routingKey: string, message: string) {

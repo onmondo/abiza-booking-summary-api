@@ -83,13 +83,32 @@ export default class ReportEndpoints {
     static v2 = class v2 extends ReportEndpoints.v1 {
         static getYearlyBookings: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
             try {
-                const transformStream = new Transform({ objectMode: true })
+                // const transformStream = new Transform({ objectMode: true })
 
-                transformStream._transform = function(chunk, encoding, callback) {
-                    callback(null, JSON.stringify(chunk))
-                }
-                const transformedBookings = Reports.v2.fetchAllYearlyBookings().pipe(transformStream)
-                transformedBookings.pipe(res)
+                // transformStream._transform = function(chunk, encoding, callback) {
+                //     callback(null, JSON.stringify(chunk))
+                // }
+                // const transformedBookings = Reports.v2.fetchAllYearlyBookings().pipe(transformStream)
+                // transformedBookings.pipe(res)
+                
+                const yearlyBookings: TYearlyBooking[] = []
+                const cursor = Reports.v2.fetchAllYearlyBookings()
+                cursor.on("data", (chunk) => {
+                    // process data here
+                    yearlyBookings.push(chunk)
+                });
+
+                cursor.on("error", (err) => {
+                    throw new Error(`Failed to fetch yearly bookings: ${err.message}`)
+                });
+
+                cursor.on("end", () => {
+                    res.json({
+                        message: "Bookings",
+                        yearlyBookings
+                    })
+                })
+
             } catch(error: any) {
                 console.log(error);
             }

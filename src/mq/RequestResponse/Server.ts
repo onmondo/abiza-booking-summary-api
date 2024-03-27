@@ -1,9 +1,9 @@
 import { ConsumeMessage, Message } from "amqplib";
-import LogChannel from "../LogChannel";
+import MQChannel from "../MQChannel";
 
 export default class Server {
     static async consumeMessage(rpcQueueName: string) {
-        const connection = await LogChannel.getInstance();
+        const connection = await MQChannel.getInstance();
         const channel = connection.getChannel();
         await channel.assertQueue(rpcQueueName, { durable: false })
         channel.prefetch(1);

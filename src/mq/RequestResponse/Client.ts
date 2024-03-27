@@ -1,39 +1,15 @@
 import { ConsumeMessage } from "amqplib";
-import LogChannel from "../LogChannel";
+import MQChannel from "../MQChannel";
 import { randomUUID } from "crypto";
 
 export default class Client {
-    // static async consumeMessage() {
-    //     const connection = await LogChannel.getInstance();
-    //     const channel = connection.getChannel();
-    //     const { queue: replyQueueName } = await channel.assertQueue("", {
-    //         exclusive: true // if server is down, this queue is deleted
-    //     })
-
-    //     console.log("Ready to consume message...")
-    //     channel.consume(replyQueueName, (message: ConsumeMessage | null) => {
-    //         if (message) {
-    //             console.log("message is: ", message.content.toString())
-    //             // message.properties.correlationId
-    //             channel.publish(
-    //                 "", 
-    //                 replyQueueName,
-    //                 Buffer.from(JSON.stringify({request: "Request for ping"})), {
-    //                     replyTo: message.properties.replyTo,
-    //                     correlationId: message.properties.correlationId
-    //                 }
-    //             );
-    //         }
-    //     })
-    // }
-
     static async produceMessage(queueName: string, data: any) {
-        const connection = await LogChannel.getInstance();
+        const connection = await MQChannel.getInstance();
         const channel = connection.getChannel();
         const queue = await channel.assertQueue("", { exclusive: true })
 
         const correlationId = randomUUID();
-        console.log(`Sending request: ${correlationId}`)
+        console.log(`Sending new booking request: ${correlationId}`)
         channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), {
             replyTo: queue.queue,
             correlationId
@@ -41,7 +17,7 @@ export default class Client {
 
         channel.consume(queue.queue, (message: ConsumeMessage | null) => {
             if (message?.properties.correlationId === correlationId) {
-                console.log("Got: ", message.content.toString())
+                console.log("new booking acknowledge, thank you: ", message.content.toString())
                 setTimeout(() => {
                     connection.closeConnection()
                 }, 500)
