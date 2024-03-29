@@ -4,11 +4,9 @@
   "description": "A local web-app that monitors expenses and earnings from guest bookings.",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --poll src/servers/GuestBooking.ts",
-    "dev:1": "ts-node-dev --poll src/servers/Client.ts",
-    "dev:2": "ts-node-dev --poll src/servers/Server.ts",
+    "dev": "ts-node-dev --poll src/app.ts",
     "build": "rimraf ./dist && tsc",
-    "start": "npm run build && node dist/servers/GuestBooking.js"
+    "start": "npm run build && node dist/app.js"
   },
   "author": "John Raymond Blando",
   "license": "ISC",

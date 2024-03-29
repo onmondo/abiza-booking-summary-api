@@ -3,13 +3,13 @@ import express, { NextFunction, Request, Response } from 'express';
 // import { createExpressMiddleware } from '@trpc/server/adapters/express';
 // import { appRouter } from './routers';
 // import { createContext } from './util/createContext';
-import guestBookings from '../routers/GuestBookings';
+import guestBookings from './routers/GuestBookings';
 // import orders from './routers/Orders';
 // import { AppDataSource } from './util/database/dataSource';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { rateLimit } from 'express-rate-limit';
-import { envKeys } from '../util/config';
+import { envKeys } from './util/config';
 
 // database connection to mongodb thru mongoose
 const {
