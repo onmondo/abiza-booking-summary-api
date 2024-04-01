@@ -10,6 +10,9 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { rateLimit } from 'express-rate-limit';
 import { envKeys } from './util/config';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import { createContext } from './util/createContext';
+import { trpcRouter } from './routers/Users';
 
 // database connection to mongodb thru mongoose
 const {
@@ -43,6 +46,11 @@ app.use(limiter);
 //     router: appRouter, 
 //     createContext
 // }));
+
+app.use('/trpc', createExpressMiddleware({ 
+    router: trpcRouter, 
+    createContext
+}));
 
 app.get('/', (req: Request, res: Response) => {
     return res.json({

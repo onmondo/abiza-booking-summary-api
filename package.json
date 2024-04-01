@@ -12,6 +12,7 @@
   "author": "John Raymond Blando",
   "license": "ISC",
   "dependencies": {
+    "@trpc/server": "^10.45.2",
     "amqplib": "^0.10.3",
     "bcrypt": "^5.1.1",
     "big.js": "^6.2.1",
