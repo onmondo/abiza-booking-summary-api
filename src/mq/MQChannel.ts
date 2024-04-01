@@ -38,9 +38,11 @@ export default class MQChannel {
     }
 
     public static async getInstance(): Promise<MQChannel> {
-        console.log("Creating new rabitmq instance...")
-        MQChannel.instance = new MQChannel()
-        await MQChannel.instance.createChannel()
+        if (!MQChannel.instance) {
+            console.log("Creating new rabitmq instance...")
+            MQChannel.instance = new MQChannel()
+            await MQChannel.instance.createChannel()
+        }
         
         return MQChannel.instance;
     }

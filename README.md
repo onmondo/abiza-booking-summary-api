@@ -35,6 +35,11 @@ LOCAL_RABBIT_MQ_URL=amqp://guest:password@localhost
 LOCAL_RABBIT_MQ_EXCHG_NAME=sampleExchangeNameLog
 ```
 
+### (optional) Seed the application by running the following command. Make sure that the reports service is running before running the seeder
+```bash
+npm run seed
+```
+
 ### And finally, serve up the resources by issuing the command
 ```bash
 npm run dev
@@ -43,4 +48,106 @@ npm run dev
 #### (optional) You can also build the app for deployment purposes by issuing the command
 ```bash
 npm run build
+```
+
+## API Endpoints
+Here are the available endpoints for consumption
+
+### Checking the health of the server
+```bash
+curl --request GET \
+  --url http://localhost:3000/ \
+  --header 'User-Agent: insomnia/2023.5.8'
+```
+
+### Fetch the yearly bookings
+```bash
+curl --request GET \
+  --url http://localhost:3000/api/v1/bookings \
+  --header 'User-Agent: insomnia/2023.5.8'
+```
+
+### Fetch the monthly bookings with booking, cost ans share details
+```bash
+curl --request GET \
+  --url http://localhost:3000/api/v1/bookings/2024 \
+  --header 'User-Agent: insomnia/2023.5.8'
+```
+
+### Fetch booking on a specific month and year
+```bash
+curl --request GET \
+  --url 'http://localhost:3000/api/v1/bookings/2024/February?sort=asc&page=1&limit=10' \
+  --header 'User-Agent: insomnia/2023.5.8'
+```
+
+### Fetch booking by ID
+```bash
+curl --request GET \
+  --url http://localhost:3000/api/v1/bookings/65f81687f8a44a9d7cd49c58 \
+  --header 'User-Agent: insomnia/2023.5.8'
+```
+
+### Submit new booking
+```bash
+curl --request POST \
+  --url http://localhost:3000/api/v1/bookings \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+    "guestName": "Wella Asis",
+		"rooms": ["room2"],
+    "checkIn": "2024-02-05",
+    "checkOut": "2024-02-06",
+    "noOfPax": 2,
+    "noOfStay": 1,
+    "nightlyPrice": 945.44,
+		"totalPayout": 945.44,
+		"from": "Booking.com",
+		"modeOfPayment": "BPI",
+    "datePaid": "2023-02-12",
+    "remarks": "Confirmed"
+}'
+```
+
+### Update existing booking
+```bash
+curl --request PUT \
+  --url http://localhost:3000/api/v1/bookings/2024/January/65f81687f8a44a9d7cd49c58 \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+	"guestName": "Brian Bier",
+	"from": "walk-in",
+	"rooms": [
+		"room1"
+	],
+	"checkIn": "2024-01-01T00:00:00.000Z",
+	"checkOut": "2024-01-07T00:00:00.000Z",
+	"noOfPax": 1,
+	"noOfStay": 6,
+	"nightlyPrice": 500,
+	"totalPayout": 3000,
+	"modeOfPayment": "BPI",
+	"datePaid": "2023-12-28T00:00:00.000Z",
+	"remarks": "Test Confirmed"
+}'
+```
+
+### Patch existing booking
+```bash
+curl --request PATCH \
+  --url http://localhost:3000/api/v1/bookings/2024/January/65f81687f8a44a9d7cd49c58 \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+	"rooms": ["room2"]
+}'
+```
+
+### Delete existing booking
+```bash
+curl --request DELETE \
+  --url http://localhost:3000/api/v1/bookings/2024/January/65ead1c7dcf6a86b0b27b065 \
+  --header 'User-Agent: insomnia/2023.5.8'
 ```

@@ -4,6 +4,7 @@
   "description": "A local web-app that monitors expenses and earnings from guest bookings.",
   "main": "index.js",
   "scripts": {
+    "seed": "ts-node-dev src/seeder/index.ts",
     "dev": "ts-node-dev --poll src/app.ts",
     "build": "rimraf ./dist && tsc",
     "start": "npm run build && node dist/app.js"
@@ -26,6 +27,7 @@
     "otplib": "^12.0.1"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@types/amqplib": "^0.10.5",
     "@types/bcrypt": "^5.0.2",
     "@types/big.js": "^6.2.2",

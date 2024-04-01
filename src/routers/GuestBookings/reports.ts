@@ -96,6 +96,7 @@ export default class ReportEndpoints {
                 cursor.on("data", (chunk) => {
                     // process data here
                     yearlyBookings.push(chunk)
+                    // chunk.pipe(res)
                 });
 
                 cursor.on("error", (err) => {
@@ -184,10 +185,28 @@ export default class ReportEndpoints {
                 const transformStream = new Transform({ objectMode: true })
 
                 transformStream._transform = function(chunk, encoding, callback) {
+                    console.log(chunk)
                     callback(null, JSON.stringify(chunk))
                 }
                 const transformedBookings = Reports.v2.fetchBookingsByYear(year).pipe(transformStream)
+                // const cursor = Reports.v2.fetchBookingsByYear(year)
                 transformedBookings.pipe(res)
+                
+                // let bookingsByYear: unknown
+                // cursor.on("data", (chunk) => {
+                //     bookingsByYear = chunk
+                // })
+
+                // cursor.on("error", (err) => {
+                //     throw new Error(`Failed to fetch yearly bookings: ${err.message}`)
+                // })
+
+                // cursor.on("end", () =>{
+                //     res.json({
+                //         message: "Bookings",
+                //         yearlyBookings: bookingsByYear
+                //     })
+                // })
             } catch(error: any) {
                 console.log(error);
             }
