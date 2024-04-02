@@ -8,7 +8,7 @@ export default class AuthorizerRoutes {
         static loginRouter = trpcInstance.procedure
             .input((value) => {
                 const validationResult = passwordSchema.validate(value)
-                console.log('validat    ionResult', validationResult)
+                console.log('validationResult', validationResult)
                 if (validationResult.error) {
                     throw new TRPCError({ code: "BAD_REQUEST", message: validationResult.error.details[0].message })
                 }

@@ -25,7 +25,7 @@ export default class User {
             // create access token
             const accessToken = generateAccessToken({
                 username: userAccount.username,
-                secret: envKeys().REGISTRATION_SECRET_KEY
+                secret: envKeys().AUTHORIZER_SECRET_KEY
             }, 60);
         
             return accessToken;

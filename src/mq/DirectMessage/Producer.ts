@@ -1,14 +1,13 @@
-import { envKeys } from "../../util/config";
-import LogChannel from "../MQChannel";
+import MQChannel from "../MQChannel";
 
 export default class Producer {
-    static async publishMesssage(routingKey: string, message: string) {
-        const { RABBIT_MQ_EXCHG_NAME } = envKeys()
-        const producer = await LogChannel.getInstance()
+    static async publishMesssage(exchangeName: string, routingKey: string, message: string) {
+        const producer = await MQChannel.getInstance()
         const channel = producer.getChannel();
-        await channel.assertExchange(RABBIT_MQ_EXCHG_NAME, "direct") // the type here might have difference variants, one is direct messaging
-        await channel.publish(
-            RABBIT_MQ_EXCHG_NAME, 
+        await channel.assertExchange(exchangeName, "direct", {durable: false}) // the type here might have difference variants, one is direct messaging
+
+        channel.publish(
+            exchangeName, 
             routingKey, 
             Buffer.from(JSON.stringify({
                 logType: routingKey,
@@ -17,6 +16,8 @@ export default class Producer {
             }))
         );
 
-        console.log(`The message ${message} is sent to exchange ${RABBIT_MQ_EXCHG_NAME}`)
+        console.log(`Broadcasting: ${message} to ${routingKey}`)
     }
 }
+
+Producer.publishMesssage("logsExchange", "info", "info logs for ordering products")

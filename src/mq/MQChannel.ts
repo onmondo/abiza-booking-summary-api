@@ -2,10 +2,6 @@ import amqp, { Channel, Connection } from "amqplib";
 import { envKeys } from "../util/config"
 
 export default class MQChannel {
-    static getInstace() {
-        throw new Error("Method not implemented.");
-    }
-
     private static instance: MQChannel;
     private channel: unknown;
     private connection: unknown;
@@ -32,7 +28,7 @@ export default class MQChannel {
         const {
             RABBIT_MQ_URL
         } = envKeys();
-        const connection: Connection = await amqp.connect(RABBIT_MQ_URL);
+        const connection: Connection = await amqp.connect(RABBIT_MQ_URL || 'amqp://guest:password@localhost');
         this.connection = connection;
         this.channel = await connection.createChannel();
     }

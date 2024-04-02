@@ -10,3 +10,5 @@ export default class Caster {
         channel.publish(exchangeName, "", Buffer.from(JSON.stringify(data)))
     }
 }
+
+Caster.sendMessage("logs", "New booking confirmed");
