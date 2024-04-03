@@ -50,7 +50,85 @@ npm run dev
 npm run build
 ```
 
-## API Endpoints
+## tRPC APIs
+Endpoints for signing up
+
+### Register as a new user
+```bash
+curl --request POST \
+  --url http://localhost:3000/trpc/register \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+	"username": "john.doe@company.com"
+}'
+```
+
+### OTP Verification
+```bash
+curl --request POST \
+  --url http://localhost:3000/trpc/verifyOtp \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+	"username": "john.doe@company.com",
+	"otp": "684965"
+}'
+```
+
+### OTP request
+```bash
+curl --request POST \
+  --url http://localhost:3000/trpc/getOtp \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+	"username": "john.doe@company.com"
+}'
+```
+
+### Profile entry
+```bash
+curl --request POST \
+  --url http://localhost:3000/trpc/profile \
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG4ucmF5bW9uZC5ibGFuZG9AZ21haWwuY29tIiwiaWF0IjoxNzExOTU4OTAxLCJleHAiOjE3MTE5NTkyMDF9.KZg3xhZaRyE_h0HW6-U8IMA6f638r7GMdD0QXWCD_hg' \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+	"username": "john.doe@company.com",
+	"firstName": "John",
+	"lastName": "Doe",
+	"birthDate": "1999-01-01"
+}'
+```
+
+### Setting up password
+```bash
+curl --request POST \
+  --url http://localhost:3000/trpc/pass \
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG4ucmF5bW9uZC5ibGFuZG9AZ21haWwuY29tIiwiaWF0IjoxNzExOTU4OTAxLCJleHAiOjE3MTE5NTkyMDF9.KZg3xhZaRyE_h0HW6-U8IMA6f638r7GMdD0QXWCD_hg' \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+	"username": "john.doe@company.com",
+	"password": "password"
+}'
+```
+
+### Signing in
+```bash
+curl --request POST \
+  --url http://localhost:3000/trpc/login \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/2023.5.8' \
+  --data '{
+	"username": "john.doe@company.com",
+	"password": "password"
+}'
+```
+
+
+## REST APIs
 Here are the available endpoints for consumption
 
 ### Checking the health of the server
