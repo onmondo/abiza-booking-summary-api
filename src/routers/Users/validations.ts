@@ -30,3 +30,7 @@ export const profileSchema = Joi.object({
         .iso()       // Allow ISO string format (e.g., "YYYY-MM-DD")
         .required(),
 });
+
+export const refreshTokenSchema = Joi.object({
+    refreshToken: Joi.string().required()
+})

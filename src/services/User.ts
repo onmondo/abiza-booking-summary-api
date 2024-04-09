@@ -1,13 +1,13 @@
-import { ILogin } from "../interface/Auth";
+import { ILogin, ILoginTokens, IRefreshToken } from "../interface/Auth";
 import { TUserAccount } from "../types/RegistrationTypes";
-import { generateAccessToken } from "../util/accessToken";
+import { generateAccessToken, generateRefreshToken } from "../util/accessToken";
 import { envKeys } from "../util/config";
 import Registration from "./Registration";
 import bcrypt from "bcrypt";
 
 export default class User {
     static v1 = class v1 {
-        static async login(request: ILogin): Promise<string | unknown> {
+        static async login(request: ILogin): Promise<ILoginTokens | unknown> {
             // get user account details
             const result = await Registration.v1.getUserAccount(request.username)
         
@@ -26,9 +26,43 @@ export default class User {
             const accessToken = generateAccessToken({
                 username: userAccount.username,
                 secret: envKeys().AUTHORIZER_SECRET_KEY
-            }, 60);
+            }, 60); // expires in 60 seconds
+
+            const refreshToken = generateRefreshToken({
+                username: userAccount.username,
+                secret: envKeys().REFRESHER_SECRET_KEY
+            }, 432000); // expires in 5 days
+
+            return {
+                accessToken,
+                refreshToken
+            };
+        }
+
+        static async refreshToken(request: IRefreshToken): Promise<ILoginTokens | unknown> {
+            // get user account details
+            const result = await Registration.v1.getUserAccount(request.username)
+
+            if (!result) {
+                throw new Error('User does not exist.')
+            }
         
-            return accessToken;
+            const userAccount = result as TUserAccount;
+            // create access token
+            const accessToken = generateAccessToken({
+                username: userAccount.username,
+                secret: envKeys().AUTHORIZER_SECRET_KEY
+            }, 60); // expires in 60 seconds
+
+            const refreshToken = generateRefreshToken({
+                username: userAccount.username,
+                secret: envKeys().REFRESHER_SECRET_KEY
+            }, 432000); // expires in 5 days
+
+            return {
+                accessToken,
+                refreshToken
+            };
         }
     }
 }

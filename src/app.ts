@@ -13,6 +13,7 @@ import { envKeys } from './util/config';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { createContext } from './util/createContext';
 import { trpcRouter } from './routers/Users';
+import { WebSocketServer } from 'ws';
 
 // database connection to mongodb thru mongoose
 const {
@@ -68,4 +69,44 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
 });
 
 const port = 3000;
-app.listen(port, () => console.log(`listening on port ${port}`))
+const server = app.listen(port, () => console.log(`listening on port ${port}`))
+
+const wss = new WebSocketServer({ server })
+wss.on("connection", (server, socket) => {
+    console.log("connected");
+
+})
+// wss.on("upgrade", (req, socket, head) => {
+//     socket.on("error", (err: Error) => {
+//         console.log(err)
+//     })
+
+//     // perform auth
+//     if (!!req.headers['BadAuth']) {
+//         socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n")
+//         socket.destroy()
+//         return
+//     }
+
+//     wss.handleUpgrade(req, socket, head, (ws) => {
+//         socket.removeListener("error", (err: Error) => {
+//             console.log(err)
+//         })
+
+//         wss.emit("connection", ws, req)
+//     })
+// })
+
+// wss.on("connection", (ws, req) => {
+//     ws.on("error", (err) => {
+//         console.log(err)
+//     })
+
+//     ws.on("message", (msg, isBinary) => {
+//         wss.clients.forEach((client) => {
+//             if(client.readyState === WebSocket.OPEN) {
+//                 client.send(msg, { binary: isBinary })
+//             }
+//         })
+//     })
+// })

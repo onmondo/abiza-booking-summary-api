@@ -7,6 +7,7 @@ type EnvKeys = {
     RABBIT_MQ_EXCHG_NAME: string,
     REGISTRATION_SECRET_KEY: string,
     AUTHORIZER_SECRET_KEY: string,
+    REFRESHER_SECRET_KEY: string,
 }
 
 export const envKeys = (): EnvKeys => {
@@ -19,7 +20,8 @@ export const envKeys = (): EnvKeys => {
             RABBIT_MQ_URL: process.env.STG_RABBIT_MQ_URL || '',
             RABBIT_MQ_EXCHG_NAME: process.env.STG_RABBIT_MQ_EXCHG_NAME || '',
             REGISTRATION_SECRET_KEY: process.env.STG_REGISTRATION_SECRET_KEY || '',
-            AUTHORIZER_SECRET_KEY: process.env.STG_AUTHORIZER_SECRET_KEY || ''
+            AUTHORIZER_SECRET_KEY: process.env.STG_AUTHORIZER_SECRET_KEY || '',
+            REFRESHER_SECRET_KEY: process.env.STG_REFRESHER_SECRET_KEY || ''
         }
     }
 
@@ -31,6 +33,7 @@ export const envKeys = (): EnvKeys => {
         RABBIT_MQ_URL: process.env.LOCAL_RABBIT_MQ_URL || '',
         RABBIT_MQ_EXCHG_NAME: process.env.LOCAL_RABBIT_MQ_EXCHG_NAME || '',
         REGISTRATION_SECRET_KEY: process.env.LOCAL_REGISTRATION_SECRET_KEY || '{b60abea4-622f-4430-ac2d-41f198583a5a}',
-        AUTHORIZER_SECRET_KEY: process.env.LOCAL_AUTHORIZER_SECRET_KEY || '{e013d815-5737-49d4-8399-c18719240605}'
+        AUTHORIZER_SECRET_KEY: process.env.LOCAL_AUTHORIZER_SECRET_KEY || '{e013d815-5737-49d4-8399-c18719240605}',
+        REFRESHER_SECRET_KEY: process.env.LOCAL_REFRESHER_SECRET_KEY || '{e44fc1c1-131e-4a0e-8e1e-01f991a536a5}'
     }
 }

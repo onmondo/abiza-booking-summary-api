@@ -12,4 +12,6 @@ export const trpcRouter = trpcInstance.router({
     profile: RegistrationRoutes.v1.submitProfileRouter,
     pass: RegistrationRoutes.v1.setPassword,
     login: AuthorizerRoutes.v1.loginRouter,
+    refresh: AuthorizerRoutes.v1.refreshRouter,
+    logout: AuthorizerRoutes.v1.logoutRouter,
 })

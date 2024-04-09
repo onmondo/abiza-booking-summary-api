@@ -16,3 +16,12 @@ export interface IsProfile extends IUser {
 export interface ILogin extends IUser {
     password: string
 }
+
+export interface ILoginTokens {
+    accessToken: string,
+    refreshToken: string
+}
+
+export interface IRefreshToken extends IUser {
+    refreshToken: string;
+}
