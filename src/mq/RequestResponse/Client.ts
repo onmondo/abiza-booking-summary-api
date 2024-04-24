@@ -18,9 +18,9 @@ export default class Client {
         channel.consume(queue.queue, (message: ConsumeMessage | null) => {
             if (message?.properties.correlationId === correlationId) {
                 console.log("new booking acknowledge, thank you: ", message.content.toString())
-                setTimeout(() => {
-                    connection.closeConnection()
-                }, 500)
+                // setTimeout(() => {
+                //     connection.closeConnection()
+                // }, 500)
             }
 
         }, { noAck: true })

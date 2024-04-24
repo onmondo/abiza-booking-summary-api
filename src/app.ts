@@ -9,11 +9,13 @@ import guestBookings from './routers/GuestBookings';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { rateLimit } from 'express-rate-limit';
+import helmet from 'helmet';
 import { envKeys } from './util/config';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { createContext } from './util/createContext';
 import { trpcRouter } from './routers/Users';
 import { WebSocketServer } from 'ws';
+import compression from 'compression';
 
 // database connection to mongodb thru mongoose
 const {
@@ -29,8 +31,9 @@ mongoose.connect(connectionUrl);
 
 export const app = express()
 app.use(express.json());
-
+app.use(helmet());
 app.use(cors());
+app.use(compression());
 
 const limiter = rateLimit({
 	windowMs: RATE_LIMIT_WINDOW, 

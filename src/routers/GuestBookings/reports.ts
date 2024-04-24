@@ -3,6 +3,7 @@ import Reports, { ReportQuery, ReportQueryById } from "../../services/Reports";
 import { isEmpty } from "lodash";
 import { TGuestBooking, TGuestBookingReport, TYearlyBooking } from "../../types/BookingTypes";
 import { Transform } from "stream";
+import zlib from "zlib";
 // import Publisher from "../../mq/DirectMessage/Producer";
 
 export default class ReportEndpoints {
@@ -82,37 +83,36 @@ export default class ReportEndpoints {
     }
     static v2 = class v2 extends ReportEndpoints.v1 {
         static getYearlyBookings: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-            try {
-                // const transformStream = new Transform({ objectMode: true })
+            // const transformStream = new Transform({ objectMode: true })
 
-                // transformStream._transform = function(chunk, encoding, callback) {
-                //     callback(null, JSON.stringify(chunk))
-                // }
-                // const transformedBookings = Reports.v2.fetchAllYearlyBookings().pipe(transformStream)
-                // transformedBookings.pipe(res)
-                
-                const yearlyBookings: TYearlyBooking[] = []
-                const cursor = Reports.v2.fetchAllYearlyBookings()
-                cursor.on("data", (chunk) => {
-                    // process data here
-                    yearlyBookings.push(chunk)
-                    // chunk.pipe(res)
-                });
+            // transformStream._transform = function(chunk, encoding, callback) {
+            //     callback(null, JSON.stringify(chunk))
+            // }
+            // const transformedBookings = Reports.v2.fetchAllYearlyBookings().pipe(transformStream)
+            // transformedBookings.pipe(res)
+            
+            // normal json response
+            // const yearlyBookings: TYearlyBooking[] = []
+            const cursor = Reports.v2.fetchAllYearlyBookings()
+            // let gzip = zlib.createGzip();
+            cursor.on("data", (chunk) => {
+                // yearlyBookings.push(chunk) // normal json version
+                cursor.pipe(res.json(chunk)) // compressed version
+            });
 
-                cursor.on("error", (err) => {
-                    throw new Error(`Failed to fetch yearly bookings: ${err.message}`)
-                });
+            cursor.on("error", (err) => {
+                // throw new Error(`Failed to fetch yearly bookings: ${err.message}`)
+                next(err)
+            });
 
-                cursor.on("end", () => {
-                    res.json({
-                        message: "Bookings",
-                        yearlyBookings
-                    })
-                })
+            // normal json response
+            // cursor.on("end", () => {
+            //     res.json({
+            //         message: "Bookings",
+            //         yearlyBookings
+            //     })
+            // })
 
-            } catch(error: any) {
-                console.log(error);
-            }
         }
 
         static getBookingById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
