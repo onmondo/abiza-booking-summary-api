@@ -25,11 +25,7 @@ export default class BookingEndpoints {
                         message: 'Booking created',
                     });
             } catch(error: any) {
-                const errorDetails = error as Error;
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: errorDetails.message
-                });
+                next(error)
             }
         }
         
@@ -47,11 +43,7 @@ export default class BookingEndpoints {
                         message: 'Booking deleted',
                     });
             } catch(error: any) {
-                const errorDetails = error as Error;
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: errorDetails.message
-                });
+                next(error)
             }
         }
         
@@ -68,11 +60,7 @@ export default class BookingEndpoints {
                         message: 'Booking updated',
                     });
             } catch(error: any) {
-                const errorDetails = error as Error;
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: errorDetails.message
-                });
+                next(error)
             }
         }
         
@@ -89,11 +77,7 @@ export default class BookingEndpoints {
                         message: 'Booking updated',
                     });
             } catch(error: any) {
-                const errorDetails = error as Error;
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: errorDetails.message
-                });
+                next(error)
             }
         }
     }

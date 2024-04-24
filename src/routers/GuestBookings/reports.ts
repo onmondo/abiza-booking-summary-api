@@ -101,7 +101,6 @@ export default class ReportEndpoints {
             });
 
             cursor.on("error", (err) => {
-                // throw new Error(`Failed to fetch yearly bookings: ${err.message}`)
                 next(err)
             });
 
@@ -136,7 +135,7 @@ export default class ReportEndpoints {
                     });
                 }
             } catch(error: any) {
-                console.log(error);
+                next(error)
             }
         }
 
@@ -170,7 +169,7 @@ export default class ReportEndpoints {
                     });
                 }
             } catch(error: any) {
-                console.log(error);
+                next(error)
             }
         }
 

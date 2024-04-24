@@ -50,6 +50,11 @@ npm run dev
 npm run build
 ```
 
+### (optional) You can also use the PM2 starter that spins up the server by issuing the command. This will not only build the project but also starts the server utilizing the PM2.
+```bash
+npm start
+```
+
 ## tRPC APIs
 Endpoints for signing up
 
@@ -127,8 +132,7 @@ curl --request POST \
 }'
 ```
 
-
-## REST APIs
+## Fetch endpoints
 Here are the available endpoints for consumption
 
 ### Checking the health of the server
@@ -166,6 +170,7 @@ curl --request GET \
   --header 'User-Agent: insomnia/2023.5.8'
 ```
 
+## Transactional endpoints
 ### Submit new booking
 ```bash
 curl --request POST \
