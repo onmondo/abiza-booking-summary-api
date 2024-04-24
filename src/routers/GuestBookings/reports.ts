@@ -3,7 +3,7 @@ import Reports, { ReportQuery, ReportQueryById } from "../../services/Reports";
 import { isEmpty } from "lodash";
 import { TGuestBooking, TGuestBookingReport, TYearlyBooking } from "../../types/BookingTypes";
 import { Transform } from "stream";
-import zlib from "zlib";
+// import zlib from "zlib";
 // import Publisher from "../../mq/DirectMessage/Producer";
 
 export default class ReportEndpoints {
@@ -105,13 +105,9 @@ export default class ReportEndpoints {
                 next(err)
             });
 
-            // normal json response
-            // cursor.on("end", () => {
-            //     res.json({
-            //         message: "Bookings",
-            //         yearlyBookings
-            //     })
-            // })
+            cursor.on("end", () => {
+                res.end()
+            })
 
         }
 
