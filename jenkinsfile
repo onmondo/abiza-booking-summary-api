@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    tools { nodejs 'node' }
+    stages {
+        // IAM Role for the Jenkins EC2 instance have limited policy so skip this right now
+        // stage('Check CloudFormation Deployment') {
+        //     steps {
+        //         // script {
+        //         //     // Check if the flag file exists
+        //         //     def flagFile = file('cf_deployed.flag')
+        //         //     if (flagFile.exists()) {
+        //         //         echo "CloudFormation stack already deployed. Skipping EC2 instance creation."
+        //         //         currentBuild.result = 'SUCCESS'
+        //         //         return
+        //         //     }
+        //         // }
+        //         echo 'building cloudformation...'
+        //         echo 'Success cloudformation stack'
+        //         echo 'checking existing stack'
+        //     }
+        // }
+        
+        // stage('Deploy CloudFormation Stack') {
+        //     steps {
+        //         // Add steps to deploy CloudFormation stack here
+        //         // For example:
+        //         // sh 'aws cloudformation deploy --template-file your-template.yaml --stack-name your-stack-name'
+        //         echo 'deploying template to create stack'
+        //     }
+        // }
+        
+        // stage('Save Deployment Flag') {
+        //     steps {
+        //         // script {
+        //         //     // Create the flag file to indicate successful deployment
+        //         //     writeFile file: 'cf_deployed.flag', text: ''
+        //         // }
+        //         echo 'stack deployed'
+        //     }
+        // }
+
+        stage('Connect to web app EC2 instance') {
+            steps {
+                sh ' ssh -i /home/ec2-user/access_keys/build-deploy-key.pem ec2-user@54.169.26.218'
+            }
+        }
+        stage('Build web service') {
+            steps {
+                git branch: 'main', url: 'https://github.com/onmondo/abiza-booking-summary-api.git'
+                sh 'npm run build && node dist/app.js'
+            }
+            
+        }
+
+        // stage('Test web service') {
+        //     steps {
+        //         echo 'Performing test'
+        //     }
+        // }
+
+        stage('Deploy web service to the created EC2 instance') {
+            steps {
+                echo 'Deploying to EC2'
+            }
+        }
+    }
+}

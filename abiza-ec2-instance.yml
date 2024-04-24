@@ -1,0 +1,10 @@
+Resources:
+  AbizaSummaryInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-06c4be2792f419b7b
+      KeyName: build-deploy-key
+      SecurityGroupIds:
+        - sg-059713d12975292c4
+        # created a new security group for this instance to allow any users access the api
