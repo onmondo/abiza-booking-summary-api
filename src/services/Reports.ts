@@ -1,9 +1,10 @@
-import { head, isEmpty } from "lodash";
-import YearlyBooking from "../models/YearlyBooking";
-import { TGuestBooking, TGuestBookingReport, TYearlyBooking } from "../types/BookingTypes";
-import GuestBooking from "../models/GuestBooking";
+import head from "lodash/head";
 import { SortOrder } from "mongoose";
 import moment from "moment";
+import { TGuestBooking, TGuestBookingReport, TYearlyBooking } from "../types/BookingTypes";
+import YearlyBooking from "../models/YearlyBooking";
+import GuestBooking from "../models/GuestBooking";
+import { daysInMonth, getMonth } from "../util/dates";
 
 export type ReportQuery = {
     year: string,
@@ -96,11 +97,12 @@ export default class Reports {
                     skip = (parseInt(page) - 1) * bookingsPerPage
                 }
     
-                const daysInMonth = moment(`${year}-${month}`).daysInMonth();
+                const days = daysInMonth(year, month);
+                const convertedMonth = getMonth(year, month);
                 const filter = {
                     checkIn: { 
-                        $gte: moment(`${year}-${month}-01`).toDate(), //.format("YYYY-MM-DD").toString(),
-                        $lte: moment(`${year}-${month}-${daysInMonth}`).toDate() //.format("YYYY-MM-DD").toString()
+                        $gte: new Date(`${year}-${convertedMonth}-01`), //.format("YYYY-MM-DD").toString(),
+                        $lte: new Date(`${year}-${convertedMonth}-${days}`) //.format("YYYY-MM-DD").toString()
                     }                         
                 }
                 const sortOrder = (sort === "asc") ? 1 : -1
