@@ -16,6 +16,7 @@ export default class GuestBooking {
 
         constructor() {
             this.guestBooking = {
+                referenceId: "",
                 guestName: "",
                 rooms: [],
                 checkIn: new Date(),
@@ -28,6 +29,10 @@ export default class GuestBooking {
             };
         }
 
+        public setReferenceId(referenceId: string): GuestBookingBuilder {
+            this.guestBooking.referenceId = referenceId;
+            return this;
+        }
         public setGuestName(guestName: string): GuestBookingBuilder {
             this.guestBooking.guestName = guestName;
             return this;

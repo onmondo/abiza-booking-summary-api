@@ -32,6 +32,15 @@ mongoose.connect(connectionUrl);
 export const app = express()
 app.use(express.json());
 app.use(helmet());
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", 'Booking-Status-Endpoint'],
+        },
+    })
+);
+
 app.use(cors());
 app.use(compression());
 
@@ -71,7 +80,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
     res.render('error', { error: err })
 });
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 const server = app.listen(port, () => console.log(`listening on port ${port}`))
 
 const wss = new WebSocketServer({ server })
