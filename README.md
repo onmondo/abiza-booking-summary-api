@@ -6,6 +6,7 @@ Provides monitoring services of bookings, capital expenditures, operational cost
 Install in your local machine the docker to manage docker images from docker hub or from customized docker image.
 
 ### You'll also need to clone this that listens lined up messages from the projects queue 
+This API is responsible for storing guest bookings to a database used for reports and or analytics
 ``https://github.com/onmondo/abiza-booking-reports-api``
 
 ### Install necessary dependencies

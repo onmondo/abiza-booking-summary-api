@@ -1,3 +1,4 @@
+import { Request, Response, RequestHandler, NextFunction } from "express";
 import Joi from "joi";
 
 export const registerSchema = Joi.object({
@@ -34,3 +35,31 @@ export const profileSchema = Joi.object({
 export const refreshTokenSchema = Joi.object({
     refreshToken: Joi.string().required()
 })
+
+export const validateLogin: RequestHandler = 
+    (req: Request, res: Response, next: NextFunction) => {
+        const validationResult = passwordSchema.validate(req.body)
+        
+        if (validationResult.error) {
+            return res.status(401)
+                .json({
+                    message: validationResult.error.details[0].message
+                })
+        }
+
+        next();
+}
+
+export const validateRefreshToken: RequestHandler = 
+    (req: Request, res: Response, next: NextFunction) => {
+        const validationResult = refreshTokenSchema.validate(req.body)
+        
+        if (validationResult.error) {
+            return res.status(401)
+                .json({
+                    message: validationResult.error.details[0].message
+                })
+        }
+
+        next();
+}

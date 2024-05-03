@@ -13,9 +13,10 @@ import helmet from 'helmet';
 import { envKeys } from './util/config';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { createContext } from './util/createContext';
-import { trpcRouter } from './routers/Users';
+import { trpcRouter, userProfiles } from './routers/Users';
 import { WebSocketServer } from 'ws';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 
 // database connection to mongodb thru mongoose
 const {
@@ -34,6 +35,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 app.use(compression());
+app.use(cookieParser());
 
 const limiter = rateLimit({
 	windowMs: RATE_LIMIT_WINDOW, 
@@ -61,6 +63,8 @@ app.get('/', (req: Request, res: Response) => {
         message: 'Up and running...'
     })
 });
+
+app.use('/api/v1/users', userProfiles);
 
 app.use('/api/v1/bookings', guestBookings);
 

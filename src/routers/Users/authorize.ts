@@ -3,10 +3,11 @@ import { TRPCError } from '@trpc/server';
 import { passwordSchema, refreshTokenSchema } from './validations';
 import User from '../../services/User'
 import moment from 'moment';
-import { ILoginTokens, IRefreshToken } from '../../interface/Auth';
+import { ILogin, ILoginTokens, IRefreshToken } from '../../interface/Auth';
 import jwt from 'jsonwebtoken'
 import Registration from '../../services/Registration';
 import { envKeys } from '../../util/config';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 
 export default class AuthorizerRoutes {
     static v1 = class v1 {
@@ -77,7 +78,7 @@ export default class AuthorizerRoutes {
 
                 return response;
             })
-        private static setCookie = async (loginTokens: ILoginTokens): Promise<string[]> => {
+        static setCookie = async (loginTokens: ILoginTokens): Promise<string[]> => {
             // path property of cookie can be useful when your users have roles
             // and restric only what path can be access
             const expiresInAMinute = moment().add("minute", 1).toString();
@@ -98,5 +99,50 @@ export default class AuthorizerRoutes {
 
                 return { message: "User logged out" }
             })        
+    }
+    static v2 = class v2 {
+
+        static loginRouter: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const loginRequest: ILogin = req.body
+                const response = await User.v1.login(loginRequest)
+                const loginTokens = response as ILoginTokens;
+                // const cookies = await AuthorizerRoutes.v1.setCookie(loginTokens);
+                res.status(200)
+                    .cookie("access_token", loginTokens.accessToken, { maxAge: 600000, httpOnly: true })
+                    .json(response);
+            } catch(error: any) {
+                next(error)
+            }
+        }
+
+        static refreshRouter: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const { refreshToken }: IRefreshToken = req.body
+                
+                const { REFRESHER_SECRET_KEY } = envKeys();
+                const decodedToken: string | jwt.JwtPayload | unknown = await jwt.decode(refreshToken)
+                const userIdentity = decodedToken as jwt.JwtPayload;
+                const userAccount = await Registration.v1.getUserAccount(userIdentity.username);
+                if (!userAccount) {
+                    next()
+                }
+
+                const isVerified = jwt.verify(refreshToken, REFRESHER_SECRET_KEY)
+                if (!isVerified) {
+                    next()
+                }
+
+                const response = await User.v1.refreshToken({ username: userIdentity.username, refreshToken })
+                const loginTokens = response as ILoginTokens;
+                // const cookies = await AuthorizerRoutes.v1.setCookie(loginTokens);
+
+                res.status(200)
+                    .cookie("access_token", loginTokens.accessToken, { maxAge: 600000, httpOnly: true })
+                    .json(response);
+            } catch(error: any) {
+                next(error)
+            }
+        }
     }
 }

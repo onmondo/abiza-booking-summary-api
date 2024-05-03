@@ -35,6 +35,7 @@ export const signingUpProcedure = trpcInstance.procedure.use(isAuthenticatedMidd
 export const authorizeUser: RequestHandler = 
     async (req: Request, res: Response, next: NextFunction) => {
         console.log('Request', req.headers);
+        console.log('Cookies', req.cookies, req.cookies.access_token);
         const bearerToken = req.headers.authorization;
 
         if (!bearerToken) {
