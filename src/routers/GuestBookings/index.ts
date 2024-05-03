@@ -9,6 +9,7 @@ router
     .get("/", ReportEndpoints.v2.getYearlyBookings, ErrorHandlers.v1.errorHandler)
     // .get("/:year", ReportEndpoints.v2.getBookingsByYear)
     .get("/:id", ReportEndpoints.v2.getBookingById, ErrorHandlers.v1.errorHandler)
+    .get("/reference/:id", ReportEndpoints.v2.getBookingByReferenceId, ErrorHandlers.v1.errorHandler)
     // .get("/yearly", ReportEndpoints.v2.getYearlyBookings)
     .post("/", BookingEndpoints.v1.newBooking, ErrorHandlers.v1.errorHandler);
 

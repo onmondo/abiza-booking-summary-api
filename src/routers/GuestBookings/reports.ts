@@ -139,6 +139,27 @@ export default class ReportEndpoints {
             }
         }
 
+        static getBookingByReferenceId: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const referenceId: string | unknown = req.params?.id;
+
+                const guestBooking: TGuestBooking = await Reports.v1.fetchBookingByReferenceId(referenceId as string);
+                if (isEmpty(guestBooking)) {
+                    res.json({
+                        message: "Pending booking",
+                        booking: guestBooking
+                    });
+                } else {
+                    res.json({
+                        message: "Booking successfull",
+                        booking: guestBooking
+                    });
+                }
+            } catch(error: any) {
+                next(error)
+            }
+        }
+
         static getBookingsByMonth: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const year: string = req.params.year
