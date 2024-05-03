@@ -36,7 +36,7 @@ app.use(
     helmet.contentSecurityPolicy({
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", 'Booking-Status-Endpoint'],
+            scriptSrc: ["'self'", "'unsafe-inline'", 'Booking-Status-Endpoint', 'Booking-Details-Endpoint'],
         },
     })
 );
