@@ -84,6 +84,16 @@ export default class Reports {
                 throw new Error('Error in retrieving a guest booking');
             }
         }
+        static async fetchBookingByReferenceId(referenceId: string ): Promise<TGuestBooking> {
+            try {
+                const guestBooking: TGuestBooking | null = await GuestBooking.findOne({ referenceId: referenceId })
+                const projectedGuestBooking  = guestBooking as TGuestBooking;
+                return projectedGuestBooking;
+            } catch (error: any) {
+                console.log(error.message)
+                throw new Error('Error in retrieving a guest booking');
+            }
+        }
     }
     static v2 = class v2 {
         static async fetchBookingsByMonth(reportQuery: ReportQuery): Promise<TGuestBookingReport> {

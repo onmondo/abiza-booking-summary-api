@@ -7,6 +7,7 @@ import Big from "big.js";
 import Client from "./Client";
 import { Visitor } from "../interface/Visitor";
 import GuestBookingDetail from "./GuestBooking";
+import MQClient from "../mq/RequestResponse/Client";
 
 type BookingDetails = {
     year: string,
@@ -40,7 +41,7 @@ export default class Guest extends Client {
         return this.bookingDetails;
     }
 
-    async book(booking: TGuestBooking) {
+    async book(booking: TGuestBooking): Promise<void> {
         const totalPayout = this.computeTotalPayout(booking.noOfPax, booking.noOfStay, booking.nightlyPrice);
 
         // build new guest booking
@@ -48,6 +49,7 @@ export default class Guest extends Client {
         const guestBookingBuilder = new GuestBookingDetail.GuestBookingBuilder()
         guestBookingDirector.buildNewGuestBooking(guestBookingBuilder);
         guestBookingBuilder
+            .setReferenceId(booking.referenceId)
             .setGuestName(booking.guestName)
             .setFrom(booking.from)
             .setRooms(booking.rooms)
@@ -71,6 +73,9 @@ export default class Guest extends Client {
         this.bookingDetails.month = month;
         this.bookingDetails.year = year;
         this.bookingDetails.bookingId = guestBooking._id.toString();
+
+        // send message to message broker to complete booking
+        MQClient.produceMessage("rpc_queue", this.bookingDetails);
     }
 
     async cancelBooking(deleteBooking: TDeleteBooking) {

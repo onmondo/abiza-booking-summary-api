@@ -1,4 +1,5 @@
 export type TGuestBooking = {
+    referenceId: string;
     guestName: string;
     rooms: string[];
     checkIn: Date;

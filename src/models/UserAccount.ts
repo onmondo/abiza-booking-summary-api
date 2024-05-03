@@ -1,4 +1,3 @@
-import { StringModule } from "@faker-js/faker";
 import mongoose from "mongoose";
 
 export const userAccountSchema = new mongoose.Schema({

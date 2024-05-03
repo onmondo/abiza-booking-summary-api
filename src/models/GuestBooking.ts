@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 export const guestBookingSchema = new mongoose.Schema({
+    referenceId: {
+        type: String,
+        required: true
+    },
     guestName: {
         type: String,
         required: true,
