@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
+import { v4 } from "uuid";
+import fs from "fs";
+import zlib from "zlib";
+import csv from "csvtojson";
+import { pipeline } from "stream/promises";
+
+import Client from "../../mq/RequestResponse/Client"
 import Guest from "../../services/Guest";
 import { TGuestBooking } from "../../types/BookingTypes";
 import DeleteBookingVisitor from "../../services/DeleteBookingVisitor";
-import { v4 } from "uuid";
-import fs from "fs";
-// import path from "path";
-import csv from "csvtojson";
-import  { Transform } from "stream";
 
 export default class BookingEndpoints {
     static v1 = class v1 {
@@ -28,56 +30,24 @@ export default class BookingEndpoints {
         }
 
         static newBookings: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+            // const csvPath = path.join(__dirname, `../../data/Guest_Room_Bookings_2024_January_CSV.csv`)
+            const readStream = fs.createReadStream(`src/data/Guest_Room_Bookings_2024_January_CSV.csv`)
+
+            const guest = new Guest();
+
             try {
-                // const csvPath = path.join(__dirname, `../../data/Guest_Room_Bookings_2024_January_CSV.csv`)
-                const readStream = fs.createReadStream(`src/data/Guest_Room_Bookings_2024_January_CSV.csv`)
-                const writeStream = fs.createWriteStream(`src/data/Export_Guest_Room_Bookings_2024_January_CSV.csv`)
-
-                const transformCsv = new Transform({
-                    objectMode: true,
-                    transform(chunk, encoding, callback) {
-                        // console.log(" >> Chunk: ", chunk)
-                        const nightlyPrice = parseFloat(chunk["Nightly Price"].replace(",", ""));
-                        const totalPayout = parseFloat(chunk["Total Payout"].replace(",", ""));
-
-                        const booking = {
-                            rooms: chunk["Room Occupied"].split(","),
-                            guestName: chunk["Guest Name"],
-                            checkIn: new Date(chunk["Check-In"]),
-                            checkOut: new Date(chunk["Check-Out"]),
-                            noOfPax: parseInt(chunk["No of Pax"]),
-                            noOfStay: parseInt(chunk["No of Stay"]),
-                            nightlyPrice: (nightlyPrice) ? nightlyPrice : 0,
-                            totalPayout: (totalPayout) ? totalPayout : 0,
-                            from: chunk["From"],
-                            modeOfPayment: chunk["Mode of Payment"],
-                            datePaid: new Date(chunk["Date Paid"].replace(",", "")),
-                            remarks: chunk["Remarks"]
-                        }
-                        // don't send any data on to your callback if this is the last process
-                        callback(null, booking) 
-                    },
-                    // flush or final here...
-                })
-
-                readStream
-                    .pipe(
-                        csv({
-                            delimiter: ','
-                        }, { objectMode: true })
-                    )
-                    .pipe(transformCsv)
-                    .on("data", data  => {
-                        console.log(" >>>> data: ")
-                        console.log(data)
-                    })
-                    .on("error", error => {
-                        console.error("Stream error")
-                    })
-                    .on("end", () => {
-                        console.log("Stream ended")
-                    })
-                    res.status(202).end()
+                await pipeline(
+                    readStream,
+                    csv({ delimiter: ',' }, { objectMode: true }),
+                    guest.transformCsv(),
+                    guest.batchBook(),
+                    guest.convertToNdJson(),
+                    zlib.createGzip(), // compress file
+                    fs.createWriteStream(`src/data/Export_Guest_Room_Bookings_2024_January_CSV.ndjson.gz`)
+                )
+                res.status(202).json({
+                    bookings: guest.getUploadedBookings()
+                }).end()
             } catch(error: any) {
                 next(error)
             }

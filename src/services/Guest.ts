@@ -1,10 +1,10 @@
-import { isEmpty } from "lodash";
-import GuestBooking from "../models/GuestBooking";
-import YearlyBooking from "../models/YearlyBooking";
-import { TDeleteBooking, TGuestBooking, TUpdateGuestBooking, TYearlyBooking } from "../types/BookingTypes";
 import moment from "moment";
 import Big from "big.js";
+import { Transform } from "stream";
+import { v4 } from "uuid";
 import Client from "./Client";
+import GuestBooking from "../models/GuestBooking";
+import { TDeleteBooking, TGuestBooking, TUpdateGuestBooking, TYearlyBooking } from "../types/BookingTypes";
 import { Visitor } from "../interface/Visitor";
 import GuestBookingDetail from "./GuestBooking";
 import MQClient from "../mq/RequestResponse/Client";
@@ -18,6 +18,8 @@ type BookingDetails = {
 export default class Guest extends Client {
     private bookingDetails: BookingDetails
 
+    private uploadedBookings: Object[]
+
     constructor() {
         super();
         this.bookingDetails = {
@@ -25,6 +27,7 @@ export default class Guest extends Client {
             month: "",
             bookingId: "",
         }
+        this.uploadedBookings = []
     }
 
     private computeTotalPayout(noOfPax: number, noOfStay: number, nightlyPrice: number): number {
@@ -39,6 +42,10 @@ export default class Guest extends Client {
 
     public getBookingDetails(): BookingDetails {
         return this.bookingDetails;
+    }
+
+    public getUploadedBookings(): Object[] {
+        return this.uploadedBookings
     }
 
     async book(booking: TGuestBooking): Promise<void> {
@@ -136,5 +143,64 @@ export default class Guest extends Client {
         const guestBookingRequest = guestBookingDetails as TUpdateGuestBooking<object>;
 
         await GuestBooking.findByIdAndUpdate({ _id: bookingId }, guestBookingRequest.details)
+    }
+
+    public transformCsv() {
+        const self = this
+        return new Transform({
+            objectMode: true,
+            transform(chunk, encoding, callback) {
+                // console.log(" >> Chunk: ", chunk)
+                const nightlyPrice = parseFloat(chunk["Nightly Price"].replace(",", ""))
+                const totalPayout = parseFloat(chunk["Total Payout"].replace(",", ""))
+                const checkIn = chunk["Check-In"]
+                const checkOut = chunk["Check-Out"]
+                const datePaid = chunk["Date Paid"]
+                
+                const booking: TGuestBooking = {
+                    referenceId: v4(),
+                    rooms: chunk["Room Occupied"].split(","),
+                    guestName: chunk["Guest Name"], 
+                    checkIn: (!checkIn || checkIn === "") ? new Date() : new Date(checkIn),
+                    checkOut: (!checkOut || checkOut === "") ? new Date() : new Date(checkOut),
+                    noOfPax: parseInt(chunk["No of Pax"]),
+                    noOfStay: parseInt(chunk["No of Stay"]),
+                    nightlyPrice: (nightlyPrice) ? nightlyPrice : 0,
+                    totalPayout: (totalPayout) ? totalPayout : 0,
+                    from: chunk["From"],
+                    modeOfPayment: chunk["Mode of Payment"],
+                    datePaid: (!datePaid || datePaid === "") ? new Date() : new Date(datePaid),
+                    remarks: chunk["Remarks"]
+                }
+                // send data to a collection or array
+                self.uploadedBookings.push(booking);
+                // don't send any data on to your callback if this is the last process
+                // callback(null, booking) 
+                callback(null, booking)
+            },
+            // flush or final here...
+        })
+    }
+
+    public batchBook() {
+        const self = this
+        return new Transform({
+            objectMode: true,
+            async transform(booking, encoding, callback) {
+                await self.book(booking); // persist booking
+                callback(null, booking);// pass the booking as is
+            }
+        })
+    }
+
+    public convertToNdJson() {
+        return new Transform({
+            objectMode: true,
+            transform(booking, encoding, callback) {
+                // convert booking to json string before compression
+                const ndjson = `${JSON.stringify(booking)} \n`
+                callback(null, ndjson)
+            }
+        })
     }
 }
