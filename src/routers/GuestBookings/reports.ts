@@ -145,17 +145,14 @@ export default class ReportEndpoints {
 
                 const guestBooking: TGuestBooking = await Reports.v1.fetchBookingByReferenceId(referenceId as string);
                 if (isEmpty(guestBooking)) {
-                    res.json({
+                    res.status(302)
+                        .header('Booking-Details-Endpoint', `http://${req.hostname}:${process.env.PORT}/api/v1/bookings/${guestBooking._id}`)
+                        .json({
                             message: "Pending booking",
                             booking: guestBooking
                         });
                 } else {
-                    res.status(303)
-                        .header('Booking-Details-Endpoint', `http://${req.hostname}:${process.env.PORT}/api/v1/bookings/${guestBooking._id}`)
-                        .json({
-                            message: "Booking successfull",
-                            booking: guestBooking
-                        });
+                    res.redirect(301, `/api/v1/bookings/${guestBooking._id}`)
                 }
             } catch(error: any) {
                 next(error)
