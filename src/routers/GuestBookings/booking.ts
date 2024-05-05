@@ -1,8 +1,14 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
+import { v4 } from "uuid";
+import fs from "fs";
+import zlib from "zlib";
+import csv from "csvtojson";
+import { pipeline } from "stream/promises";
+
+import Client from "../../mq/RequestResponse/Client"
 import Guest from "../../services/Guest";
 import { TGuestBooking } from "../../types/BookingTypes";
 import DeleteBookingVisitor from "../../services/DeleteBookingVisitor";
-import { v4 } from "uuid";
 
 export default class BookingEndpoints {
     static v1 = class v1 {
@@ -18,6 +24,30 @@ export default class BookingEndpoints {
                     .json({
                         message: 'Booking created',
                     });
+            } catch(error: any) {
+                next(error)
+            }
+        }
+
+        static newBookings: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+            // const csvPath = path.join(__dirname, `../../data/Guest_Room_Bookings_2024_January_CSV.csv`)
+            const readStream = fs.createReadStream(`src/data/Guest_Room_Bookings_2024_January_CSV.csv`)
+
+            const guest = new Guest();
+
+            try {
+                await pipeline(
+                    readStream,
+                    csv({ delimiter: ',' }, { objectMode: true }),
+                    guest.transformCsv(),
+                    guest.batchBook(),
+                    guest.convertToNdJson(),
+                    zlib.createGzip(), // compress file
+                    fs.createWriteStream(`src/data/Export_Guest_Room_Bookings_2024_January_CSV.ndjson.gz`)
+                )
+                res.status(202).json({
+                    bookings: guest.getUploadedBookings()
+                }).end()
             } catch(error: any) {
                 next(error)
             }

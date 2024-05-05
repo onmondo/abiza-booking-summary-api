@@ -11,8 +11,9 @@ router
     .get("/:id", ReportEndpoints.v2.getBookingById, ErrorHandlers.v1.errorHandler)
     .get("/reference/:id", ReportEndpoints.v2.getBookingByReferenceId, ErrorHandlers.v1.errorHandler)
     // .get("/yearly", ReportEndpoints.v2.getYearlyBookings)
-    .post("/", BookingEndpoints.v1.newBooking, ErrorHandlers.v1.errorHandler);
-
+    .post("/", BookingEndpoints.v1.newBooking, ErrorHandlers.v1.errorHandler)
+    .post("/csv", BookingEndpoints.v1.newBookings, ErrorHandlers.v1.errorHandler);
+    
 router
     .get("/:year/:month", ReportEndpoints.v2.getBookingsByMonth, ErrorHandlers.v1.errorHandler)
     .delete("/:year/:month/:id", BookingEndpoints.v1.deleteBookingById, ErrorHandlers.v1.errorHandler)
