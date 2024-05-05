@@ -55,10 +55,10 @@ const limiter = rateLimit({
 })
 
 app.use(limiter);
-// app.use('/trpc', createExpressMiddleware({ 
-//     router: appRouter, 
-//     createContext
-// }));
+
+app.set('view engine', 'pug')
+app.set("views", `src/views`)
+
 
 app.use('/trpc', createExpressMiddleware({ 
     router: trpcRouter, 
@@ -76,8 +76,7 @@ app.use('/api/v1/bookings', guestBookings);
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
     const err = new Error(`Cannot find ${req.originalUrl} on this server!`);
     next(err);
-    res.sendStatus(404)
-    res.render('error', { error: err })
+    res.status(404).render('notfound', { title: '404 not found', message: 'The resource is not available.' })
 });
 
 const port = process.env.PORT || 3000;
