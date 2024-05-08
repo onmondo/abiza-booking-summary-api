@@ -18,8 +18,9 @@ export interface ILogin extends IUser {
 }
 
 export interface ILoginTokens {
-    accessToken: string,
+    accessToken: string
     refreshToken: string
+    csrfToken: string
 }
 
 export interface IRefreshToken extends IUser {

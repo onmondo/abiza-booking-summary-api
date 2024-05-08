@@ -9,6 +9,7 @@ export const userAccountSchema = new mongoose.Schema({
     otp: String,
     otpSecret: String,
     otpVerified: Boolean,
+    csrfToken: String,
     profile: {
         firstname: String,
         lastname: String,

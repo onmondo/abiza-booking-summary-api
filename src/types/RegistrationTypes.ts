@@ -4,6 +4,7 @@ export type TUserAccount = {
     otp: string
     otpSecret: string
     otpVerified: boolean
+    csrfToken?: string
     profile?: {
         firstname: string
         lastname: string

@@ -5,15 +5,15 @@ import ErrorHandlers from './errorHandlers';
 import { authorizeUser } from '../Users/middlewares';
 
 const router = Router();
-router.use(authorizeUser);
+// router.use(authorizeUser);
 router
     .get("/", ReportEndpoints.v2.getYearlyBookings)
     // .get("/:year", ReportEndpoints.v2.getBookingsByYear)
     .get("/:id", ReportEndpoints.v2.getBookingById)
     .get("/reference/:id", ReportEndpoints.v2.getBookingByReferenceId)
     // .get("/yearly", ReportEndpoints.v2.getYearlyBookings)
-    .post("/", BookingEndpoints.v1.newBooking)
-    .post("/csv", BookingEndpoints.v1.newBookings);
+    .post("/", authorizeUser, BookingEndpoints.v1.newBooking)
+    .post("/csv", authorizeUser, BookingEndpoints.v1.newBookings);
     
 router
     .get("/:year/:month", ReportEndpoints.v2.getBookingsByMonth)

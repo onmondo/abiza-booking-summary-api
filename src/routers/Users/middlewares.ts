@@ -35,7 +35,7 @@ export const signingUpProcedure = trpcInstance.procedure.use(isAuthenticatedMidd
 export const authorizeUser: RequestHandler = 
     async (req: Request, res: Response, next: NextFunction) => {
         const bearerToken = req.headers.authorization;
-
+        const csrfTokenRequest = req.body.csrfToken;
         if (!bearerToken) {
             return res.sendStatus(401)
         }
@@ -45,23 +45,29 @@ export const authorizeUser: RequestHandler =
             const decodedToken: string | jwt.JwtPayload | unknown = await jwt.decode(token)
             const userIdentity = decodedToken as jwt.JwtPayload;
             const userAccount = await Registration.v1.getUserAccount(userIdentity.username);
-    
             if (!userAccount) {
                 res.status(400)
                     .json({
                         message: 'User does not exist',
                     })
-                    .end();
+                    
+                    next(new Error("Bad Request"))
             }
     
             const isVerified = jwt.verify(token, envKeys().AUTHORIZER_SECRET_KEY)
             if (!isVerified) {
-                res.sendStatus(401)
+                return res.sendStatus(401)
             }
+            
+            if (csrfTokenRequest !== userAccount.csrfToken) {
+                // might want to log this attack
+                return res.sendStatus(401)
+            }
+
             res.locals.user = userAccount;
             next();
         } catch(error) {
-            res.sendStatus(401)
+            return res.sendStatus(401)
         }
 
     };

@@ -8,6 +8,7 @@ import { TDeleteBooking, TGuestBooking, TUpdateGuestBooking, TYearlyBooking } fr
 import { Visitor } from "../interface/Visitor";
 import GuestBookingDetail from "./GuestBooking";
 import MQClient from "../mq/RequestResponse/Client";
+import UserAccount from "../models/UserAccount";
 
 type BookingDetails = {
     year: string,
@@ -202,5 +203,17 @@ export default class Guest extends Client {
                 callback(null, ndjson)
             }
         })
+    }
+
+    public async generateCSRF(username: string) {
+        const csrfToken = v4();
+        await UserAccount.findOneAndUpdate(
+            { username }, 
+            { 
+                csrfToken
+            }
+        )
+
+        return csrfToken
     }
 }

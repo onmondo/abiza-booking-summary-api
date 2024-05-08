@@ -4,6 +4,7 @@ import { generateAccessToken, generateRefreshToken } from "../util/accessToken";
 import { envKeys } from "../util/config";
 import Registration from "./Registration";
 import bcrypt from "bcrypt";
+import Guest from "./Guest";
 
 export default class User {
     static v1 = class v1 {
@@ -33,9 +34,14 @@ export default class User {
                 secret: envKeys().REFRESHER_SECRET_KEY
             }, 432000); // expires in 5 days
 
+            // Produce CSRF token here for presistence
+            const guest = new Guest()
+            const csrfToken = await guest.generateCSRF(userAccount.username)
+
             return {
                 accessToken,
-                refreshToken
+                refreshToken,
+                csrfToken,
             };
         }
 
