@@ -3,6 +3,7 @@ import Reports, { ReportQuery, ReportQueryById } from "../../services/Reports";
 import { isEmpty } from "lodash";
 import { TGuestBooking, TGuestBookingReport, TYearlyBooking } from "../../types/BookingTypes";
 import { Transform } from "stream";
+import { catchAsync } from "../../util/catchAsync";
 // import zlib from "zlib";
 // import Publisher from "../../mq/DirectMessage/Producer";
 
@@ -110,121 +111,106 @@ export default class ReportEndpoints {
 
         }
 
-        static getBookingById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-            try {
-                const year: string = req.params?.year
-                const month: string = req.params?.month
-                const bookingId: string = req.params?.id
-        
-                const reportQuery: ReportQueryById = {
-                    id: bookingId,
-                    year,
-                    month,
-                }
-                // const sortMethod = sort as string;
-                const guestBooking: TGuestBooking = await Reports.v1.fetchBookingsById(reportQuery);
-                if (isEmpty(guestBooking)) {
-                    res.json({
+        static getBookingById: RequestHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+            const year: string = req.params?.year
+            const month: string = req.params?.month
+            const bookingId: string = req.params?.id
+    
+            const reportQuery: ReportQueryById = {
+                id: bookingId,
+                year,
+                month,
+            }
+            // const sortMethod = sort as string;
+            const guestBooking: TGuestBooking = await Reports.v1.fetchBookingsById(reportQuery);
+            if (isEmpty(guestBooking)) {
+                res.status(404)
+                    .json({
                         message: "No monthly bookings",
+                    });
+            } else {
+                res.json({
+                    message: "Bookings",
+                    booking: guestBooking
+                });
+            }
+        })
+
+        static getBookingByReferenceId: RequestHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+            const referenceId: string | unknown = req.params?.id;
+
+            const guestBooking: TGuestBooking = await Reports.v1.fetchBookingByReferenceId(referenceId as string);
+            if (isEmpty(guestBooking)) {
+                res.status(302)
+                    .header('Booking-Details-Endpoint', `http://${req.hostname}:${process.env.PORT}/api/v1/bookings/${guestBooking._id}`)
+                    .json({
+                        message: "Pending booking",
                         booking: guestBooking
                     });
-                } else {
-                    res.json({
-                        message: "Bookings",
-                        booking: guestBooking
-                    });
-                }
-            } catch(error: any) {
-                next(error)
+            } else {
+                res.redirect(301, `/api/v1/bookings/${guestBooking._id}`)
             }
-        }
+        })
 
-        static getBookingByReferenceId: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-            try {
-                const referenceId: string | unknown = req.params?.id;
-
-                const guestBooking: TGuestBooking = await Reports.v1.fetchBookingByReferenceId(referenceId as string);
-                if (isEmpty(guestBooking)) {
-                    res.status(302)
-                        .header('Booking-Details-Endpoint', `http://${req.hostname}:${process.env.PORT}/api/v1/bookings/${guestBooking._id}`)
-                        .json({
-                            message: "Pending booking",
-                            booking: guestBooking
-                        });
-                } else {
-                    res.redirect(301, `/api/v1/bookings/${guestBooking._id}`)
-                }
-            } catch(error: any) {
-                next(error)
+        static getBookingsByMonth: RequestHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+            const year: string = req.params.year
+            const month: string = req.params.month
+            const sort: string | unknown = req.query?.sort;
+            const page: string | unknown = req.query?.page;
+            const limit: string | unknown = req.query?.limit;
+    
+            const reportQuery: ReportQuery = {
+                year,
+                month,
+                sort: sort as string,
+                page: page as string,
+                limit: limit as string,
             }
-        }
-
-        static getBookingsByMonth: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-            try {
-                const year: string = req.params.year
-                const month: string = req.params.month
-                const sort: string | unknown = req.query?.sort;
-                const page: string | unknown = req.query?.page;
-                const limit: string | unknown = req.query?.limit;
-        
-                const reportQuery: ReportQuery = {
-                    year,
-                    month,
-                    sort: sort as string,
-                    page: page as string,
-                    limit: limit as string,
-                }
-                // temporary disable - MQ direct message
-                // await Publisher.publishMesssage("Info", `Booking for the month of ${month}`)
-                const monthlyBookings: TGuestBookingReport = await Reports.v2.fetchBookingsByMonth(reportQuery);
-                if (isEmpty(monthlyBookings)) {
-                    res.json({
+            // temporary disable - MQ direct message
+            // await Publisher.publishMesssage("Info", `Booking for the month of ${month}`)
+            const monthlyBookings: TGuestBookingReport = await Reports.v2.fetchBookingsByMonth(reportQuery);
+            if (isEmpty(monthlyBookings)) {
+                res.status(404)
+                    .json({
                         message: "No monthly bookings",
                         monthlyBookings: { ...monthlyBookings }
                     });
-                } else {
-                    res.json({
-                        message: "Bookings",
-                        monthlyBookings: { ...monthlyBookings }
-                    });
-                }
-            } catch(error: any) {
-                next(error)
+            } else {
+                res.json({
+                    message: "Bookings",
+                    monthlyBookings: { ...monthlyBookings }
+                });
             }
-        }
+        })
 
-        static getBookingsByYear: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-            try {
-                const year: string = req.params.year
+        static getBookingsByYear: RequestHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+            const year: string = req.params.year
 
-                const transformStream = new Transform({ objectMode: true })
+            const transformStream = new Transform({ objectMode: true })
 
-                transformStream._transform = function(chunk, encoding, callback) {
-                    console.log(chunk)
-                    callback(null, JSON.stringify(chunk))
-                }
-                const transformedBookings = Reports.v2.fetchBookingsByYear(year).pipe(transformStream)
-                // const cursor = Reports.v2.fetchBookingsByYear(year)
-                transformedBookings.pipe(res)
-                
-                // let bookingsByYear: unknown
-                // cursor.on("data", (chunk) => {
-                //     bookingsByYear = chunk
-                // })
-
-                // cursor.on("error", (err) => {
-                //     throw new Error(`Failed to fetch yearly bookings: ${err.message}`)
-                // })
-
-                // cursor.on("end", () =>{
-                //     res.json({
-                //         message: "Bookings",
-                //         yearlyBookings: bookingsByYear
-                //     })
-                // })
-            } catch(error: any) {
-                console.log(error);
+            transformStream._transform = function(chunk, encoding, callback) {
+                console.log(chunk)
+                callback(null, JSON.stringify(chunk))
             }
-        }
+            const transformedBookings = Reports.v2.fetchBookingsByYear(year).pipe(transformStream)
+            // const cursor = Reports.v2.fetchBookingsByYear(year)
+            transformedBookings.pipe(res)
+            
+            // let bookingsByYear: unknown
+            // cursor.on("data", (chunk) => {
+            //     bookingsByYear = chunk
+            // })
+
+            // cursor.on("error", (err) => {
+            //     throw new Error(`Failed to fetch yearly bookings: ${err.message}`)
+            // })
+
+            // cursor.on("end", () =>{
+            //     res.json({
+            //         message: "Bookings",
+            //         yearlyBookings: bookingsByYear
+            //     })
+            // })
+        })
     }
 }

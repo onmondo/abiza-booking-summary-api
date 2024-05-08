@@ -2,22 +2,25 @@ import { Router } from 'express';
 import ReportEndpoints from './reports';
 import BookingEndpoints from './booking';
 import ErrorHandlers from './errorHandlers';
-// import { authorizeUser } from '../Users/middlewares';
+import { authorizeUser } from '../Users/middlewares';
 
 const router = Router();
+router.use(authorizeUser);
 router
-    .get("/", ReportEndpoints.v2.getYearlyBookings, ErrorHandlers.v1.errorHandler)
+    .get("/", ReportEndpoints.v2.getYearlyBookings)
     // .get("/:year", ReportEndpoints.v2.getBookingsByYear)
-    .get("/:id", ReportEndpoints.v2.getBookingById, ErrorHandlers.v1.errorHandler)
-    .get("/reference/:id", ReportEndpoints.v2.getBookingByReferenceId, ErrorHandlers.v1.errorHandler)
+    .get("/:id", ReportEndpoints.v2.getBookingById)
+    .get("/reference/:id", ReportEndpoints.v2.getBookingByReferenceId)
     // .get("/yearly", ReportEndpoints.v2.getYearlyBookings)
-    .post("/", BookingEndpoints.v1.newBooking, ErrorHandlers.v1.errorHandler)
-    .post("/csv", BookingEndpoints.v1.newBookings, ErrorHandlers.v1.errorHandler);
+    .post("/", BookingEndpoints.v1.newBooking)
+    .post("/csv", BookingEndpoints.v1.newBookings);
     
 router
-    .get("/:year/:month", ReportEndpoints.v2.getBookingsByMonth, ErrorHandlers.v1.errorHandler)
-    .delete("/:year/:month/:id", BookingEndpoints.v1.deleteBookingById, ErrorHandlers.v1.errorHandler)
-    .put("/:year/:month/:id", BookingEndpoints.v1.updateBookingById, ErrorHandlers.v1.errorHandler)
-    .patch("/:year/:month/:id", BookingEndpoints.v1.softUpdateBookingById, ErrorHandlers.v1.errorHandler);
+    .get("/:year/:month", ReportEndpoints.v2.getBookingsByMonth)
+    .delete("/:year/:month/:id", BookingEndpoints.v1.deleteBookingById)
+    .put("/:year/:month/:id", BookingEndpoints.v1.updateBookingById)
+    .patch("/:year/:month/:id", BookingEndpoints.v1.softUpdateBookingById);
+
+router.use(ErrorHandlers.v1.errorHandler);
 
 export default router;
