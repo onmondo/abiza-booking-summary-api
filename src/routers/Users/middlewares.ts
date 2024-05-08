@@ -34,44 +34,34 @@ export const signingUpProcedure = trpcInstance.procedure.use(isAuthenticatedMidd
 
 export const authorizeUser: RequestHandler = 
     async (req: Request, res: Response, next: NextFunction) => {
-        console.log('Request', req.headers);
         const bearerToken = req.headers.authorization;
 
         if (!bearerToken) {
-            return res.status(401)
-                .json({
-                    message: 'User unauthorized to use the API',
-                });
+            return res.sendStatus(401)
         }
 
         try {
             const token = bearerToken.split(' ')[1];
-            console.log('token', token);
             const decodedToken: string | jwt.JwtPayload | unknown = await jwt.decode(token)
             const userIdentity = decodedToken as jwt.JwtPayload;
             const userAccount = await Registration.v1.getUserAccount(userIdentity.username);
     
             if (!userAccount) {
-                return res.status(400)
+                res.status(400)
                     .json({
                         message: 'User does not exist',
-                    });
+                    })
+                    .end();
             }
     
             const isVerified = jwt.verify(token, envKeys().AUTHORIZER_SECRET_KEY)
             if (!isVerified) {
-                return res.status(401)
-                    .json({
-                        message: 'User unauthorized to use the API',
-                    });
+                res.sendStatus(401)
             }
             res.locals.user = userAccount;
-            return next();
+            next();
         } catch(error) {
-            return res.status(401)
-                .json({
-                    message: 'User unauthorized to use the API',
-                });
+            res.sendStatus(401)
         }
 
     };

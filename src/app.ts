@@ -16,6 +16,7 @@ import { createContext } from './util/createContext';
 import { trpcRouter } from './routers/Users';
 import { WebSocketServer } from 'ws';
 import compression from 'compression';
+import AppError from './util/AppError';
 
 // database connection to mongodb thru mongoose
 const {
@@ -74,10 +75,18 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/v1/bookings', guestBookings);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
-    const err = new Error(`Cannot find ${req.originalUrl} on this server!`);
-    next(err);
-    res.status(404).render('notfound', { title: '404 not found', message: 'The resource is not available.' })
+    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    err.statusCode = err.statusCode || 500
+    err.status = err.status || "error"
+
+    res.status(err.statusCode)
+        .json({
+            message: err.message
+        })
+})
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => console.log(`listening on port ${port}`))
