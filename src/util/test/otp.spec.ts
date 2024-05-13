@@ -1,9 +1,9 @@
 import assert from 'assert';
-import { describe } from 'mocha';
+// import { describe } from 'mocha';
 import { generateOtp } from '../otp';
 
 describe("Test otp.ts", () => {
-    context("Test generateOtp function", () => {
+    // context("Test generateOtp function", () => {
         // before(() => {
         //     console.log(">>>> before")
         // })
@@ -21,5 +21,5 @@ describe("Test otp.ts", () => {
             assert.notEqual(otp, null)
             assert.equal(otp.expectedOTP.length, 6)
         })
-    })
+    // })
 })
