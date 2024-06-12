@@ -5,7 +5,7 @@ import ErrorHandlers from './errorHandlers';
 import { authorizeUser } from '../Users/middlewares';
 
 const router = Router();
-router.use(authorizeUser);
+// router.use(authorizeUser);
 router
     .get("/", ReportEndpoints.v2.getYearlyBookings)
     // .get("/:year", ReportEndpoints.v2.getBookingsByYear)

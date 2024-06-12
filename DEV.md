@@ -66,3 +66,21 @@ npm i -D --save-exact dotenv rimraf
 3. Create key pair from Jenkins EC2 instance to access Abiza EC2 instance - apparently this is not possile - should update the policy for the EC2 to create a key pair
     - you may however create a key pair straight from AWS console, download the file and copy that to target EC2(from `/home/mon/aws-cformations/ec2-access-keys` to `/home/ec2-user/access_keys`)
 4. Execute the cloudformation template `abiza-ec2-instance.yml` to create new instance for the API, keyname included
+
+### Debug
+1. Run on your terminal to open inspect from chrome dev tools
+```
+NODE_OPTIONS=\"--inspect=0.0.0.0:<port number>\" ts-node-dev --poll src/app.ts
+```
+2. (Optional) To kill an existing port, use the following command
+```
+lsof -i :<port number>
+```
+3. (Optional) Kill the port using this command
+```
+kill -9 <PID of the port>
+```
+
+4. Open chrome browser and go to `chrome://inspect`
+
+5. Select the target device and proceed with the debugging

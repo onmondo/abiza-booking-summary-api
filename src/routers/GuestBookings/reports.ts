@@ -116,6 +116,7 @@ export default class ReportEndpoints {
             const month: string = req.params?.month
             const bookingId: string = req.params?.id
     
+            debugger
             const reportQuery: ReportQueryById = {
                 id: bookingId,
                 year,
