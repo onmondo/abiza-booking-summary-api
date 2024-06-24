@@ -9,7 +9,7 @@ export function daysInMonth(year: string | number, month: string | number): numb
         ? parseInt(year) 
         : year;
 
-    return new Date(enteredYear, enteredMonth + 1, 0).getDate();
+    return new Date(enteredYear, enteredMonth, 0).getDate();
 }
 
 export function getMonth(year: string | number, month: string): number {

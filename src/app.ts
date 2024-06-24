@@ -75,7 +75,8 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/v1/bookings', guestBookings);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
-    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+    // next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+    res.render('notfound', { title: 'Resource not found', message: '😅 resource not found' })
 });
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
