@@ -91,11 +91,11 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => console.log(`listening on port ${port}`))
 
-const wss = new WebSocketServer({ server })
-wss.on("connection", (server, socket) => {
-    console.log("connected");
+// const wss = new WebSocketServer({ server })
+// wss.on("connection", (server, socket) => {
+//     console.log("connected");
 
-})
+// })
 // wss.on("upgrade", (req, socket, head) => {
 //     socket.on("error", (err: Error) => {
 //         console.log(err)

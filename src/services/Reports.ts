@@ -5,6 +5,7 @@ import { TGuestBooking, TGuestBookingReport, TYearlyBooking } from "../types/Boo
 import YearlyBooking from "../models/YearlyBooking";
 import GuestBooking from "../models/GuestBooking";
 import { daysInMonth, getMonth } from "../util/dates";
+import { computeLimit, computeSkip } from "../util/reports";
 
 export type ReportQuery = {
     year: string,
@@ -45,13 +46,9 @@ export default class Reports {
         static async fetchBookingsByMonth(reportQuery: ReportQuery): Promise<TGuestBooking[]> {
             try {
                 const { year, month, sort, page, limit } = reportQuery;
-    
-                let skip: number = 0;
-                let bookingsPerPage: number = 10;
-                if (page && limit) {
-                    bookingsPerPage = parseInt(limit)
-                    skip = (parseInt(page) - 1) * bookingsPerPage
-                }
+
+                const bookingsPerPage = computeLimit(limit as string);
+                const skip = computeSkip(page as string, bookingsPerPage);
     
                 const daysInMonth = moment(`${year}-${month}`).daysInMonth();
                 const monthlyBookings = await GuestBooking
