@@ -1,6 +1,6 @@
 {
   "name": "abiza-booking-summary-api",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "A local web-app that monitors expenses and earnings from guest bookings.",
   "main": "index.js",
   "scripts": {
